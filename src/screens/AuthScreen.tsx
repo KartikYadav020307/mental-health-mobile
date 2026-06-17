@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
@@ -17,10 +16,7 @@ export default function AuthScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={['#7c3aed', '#9333ea', '#4338ca']}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
@@ -40,56 +36,43 @@ export default function AuthScreen() {
                       </View>
                     ))}
                   </View>
-
-                  <View style={styles.statsContainer}>
-                    <View style={styles.statItem}>
-                      <Text style={styles.statNum}>50K+</Text>
-                      <Text style={styles.statLabel}>Users</Text>
-                    </View>
-                    <View style={styles.statItem}>
-                      <Text style={styles.statNum}>200+</Text>
-                      <Text style={styles.statLabel}>Sessions</Text>
-                    </View>
-                    <View style={styles.statItem}>
-                      <Text style={styles.statNum}>4.9★</Text>
-                      <Text style={styles.statLabel}>Rating</Text>
-                    </View>
-                  </View>
                 </View>
 
                 <View style={styles.landingBottom}>
-                  <TouchableOpacity style={styles.primaryButton} onPress={() => setMode('signup')}>
-                    <Text style={styles.primaryButtonText}>Get Started — It's Free</Text>
+                  <TouchableOpacity style={styles.primaryButton} onPress={() => setMode('signup')} activeOpacity={0.8}>
+                    <Text style={styles.primaryButtonText}>GET STARTED</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode('login')}>
-                    <Text style={styles.secondaryButtonText}>I Already Have an Account</Text>
+                  <TouchableOpacity style={styles.secondaryButton} onPress={() => setMode('login')} activeOpacity={0.8}>
+                    <Text style={styles.secondaryButtonText}>I ALREADY HAVE AN ACCOUNT</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={handleGuest} style={styles.guestButton}>
-                    <Text style={styles.guestButtonText}>Continue as Guest →</Text>
+                  <TouchableOpacity style={styles.guestButton} onPress={handleGuest}>
+                    <Text style={styles.guestButtonText}>CONTINUE AS GUEST</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             ) : (
               <View style={styles.formContainer}>
-                <TouchableOpacity onPress={() => setMode('landing')} style={styles.backButton}>
-                  <Text style={styles.backButtonText}>← Back</Text>
-                </TouchableOpacity>
+                <View style={styles.formHeader}>
+                  <TouchableOpacity onPress={() => setMode('landing')} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>←</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.formTitleHeader}>{mode === 'signup' ? 'Create Account' : 'Welcome Back'}</Text>
+                  <View style={{ width: 40 }} />
+                </View>
 
                 <View style={styles.formContent}>
-                  <Text style={styles.formEmoji}>🧘</Text>
-                  <Text style={styles.formTitle}>{mode === 'signup' ? 'Create Account' : 'Welcome Back'}</Text>
                   <Text style={styles.formSubtitle}>{mode === 'signup' ? 'Start your wellness journey today' : 'Continue your practice'}</Text>
 
-                  <TouchableOpacity style={styles.socialButton} onPress={handleGuest}>
-                    <Text style={styles.socialButtonText}>G Continue with Google</Text>
+                  <TouchableOpacity style={styles.socialButton} onPress={handleGuest} activeOpacity={0.8}>
+                    <Text style={styles.socialButtonText}>CONTINUE WITH GOOGLE</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#000' }]} onPress={handleGuest}>
-                    <Text style={[styles.socialButtonText, { color: '#fff' }]}>🍎 Continue with Apple</Text>
+                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#1A1F2B', borderBottomColor: '#000000', borderColor: '#1A1F2B' }]} onPress={handleGuest} activeOpacity={0.8}>
+                    <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>CONTINUE WITH APPLE</Text>
                   </TouchableOpacity>
 
                   <View style={styles.divider}>
                     <View style={styles.dividerLine} />
-                    <Text style={styles.dividerText}>or</Text>
+                    <Text style={styles.dividerText}>OR</Text>
                     <View style={styles.dividerLine} />
                   </View>
 
@@ -97,7 +80,7 @@ export default function AuthScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder="Your name"
-                      placeholderTextColor="rgba(255,255,255,0.5)"
+                      placeholderTextColor="#AFAFAF"
                       value={name}
                       onChangeText={setName}
                     />
@@ -105,7 +88,7 @@ export default function AuthScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="Email address"
-                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    placeholderTextColor="#AFAFAF"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -114,73 +97,62 @@ export default function AuthScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="Password"
-                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    placeholderTextColor="#AFAFAF"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
                   />
 
-                  <TouchableOpacity style={styles.submitButton} onPress={handleGuest}>
-                    <Text style={styles.submitButtonText}>{mode === 'signup' ? 'Create Account' : 'Sign In'}</Text>
+                  <TouchableOpacity style={styles.submitButton} onPress={handleGuest} activeOpacity={0.8}>
+                    <Text style={styles.submitButtonText}>{mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN'}</Text>
                   </TouchableOpacity>
-
-                  <View style={styles.switchModeContainer}>
-                    <Text style={styles.switchModeText}>
-                      {mode === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
-                    </Text>
-                    <TouchableOpacity onPress={() => setMode(mode === 'signup' ? 'login' : 'signup')}>
-                      <Text style={styles.switchModeLink}>{mode === 'signup' ? 'Sign in' : 'Sign up'}</Text>
-                    </TouchableOpacity>
-                  </View>
                 </View>
               </View>
             )}
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   landingContainer: { flex: 1, padding: 24, justifyContent: 'space-between' },
-  landingTop: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  logoContainer: { width: 100, height: 100, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', marginBottom: 32 },
-  logoEmoji: { fontSize: 48 },
-  title: { fontSize: 36, fontWeight: 'bold', color: '#fff', marginBottom: 12 },
-  subtitle: { fontSize: 16, color: '#e9d5ff', textAlign: 'center', lineHeight: 24, marginBottom: 32 },
-  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginBottom: 32 },
-  pill: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
-  pillText: { color: '#fff', fontSize: 13 },
-  statsContainer: { flexDirection: 'row', justifyContent: 'space-around', width: '100%', paddingHorizontal: 20 },
-  statItem: { alignItems: 'center' },
-  statNum: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-  statLabel: { color: '#d8b4fe', fontSize: 12, marginTop: 4 },
+  landingTop: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 40 },
+  logoContainer: { width: 120, height: 120, backgroundColor: '#FFFFFF', borderRadius: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 8, borderBottomColor: '#E5E5E5', marginBottom: 32 },
+  logoEmoji: { fontSize: 64 },
+  title: { fontSize: 40, fontWeight: '900', color: '#58CC02', marginBottom: 12, textAlign: 'center' },
+  subtitle: { fontSize: 18, color: '#AFAFAF', textAlign: 'center', lineHeight: 26, marginBottom: 32, fontWeight: '700' },
+  pillsContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, marginBottom: 32 },
+  pill: { backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 4, borderBottomColor: '#E5E5E5' },
+  pillText: { color: '#4B4B4B', fontSize: 14, fontWeight: '900' },
+  
   landingBottom: { paddingBottom: 20 },
-  primaryButton: { backgroundColor: '#fff', paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
-  primaryButtonText: { color: '#7e22ce', fontSize: 16, fontWeight: 'bold' },
-  secondaryButton: { backgroundColor: 'rgba(255,255,255,0.2)', paddingVertical: 16, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', marginBottom: 16 },
-  secondaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  primaryButton: { backgroundColor: '#58CC02', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#58CC02', borderBottomWidth: 5, borderBottomColor: '#58A700' },
+  primaryButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
+  secondaryButton: { backgroundColor: '#FFFFFF', paddingVertical: 18, borderRadius: 16, alignItems: 'center', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', marginBottom: 16 },
+  secondaryButtonText: { color: '#1CB0F6', fontSize: 16, fontWeight: '900' },
   guestButton: { alignItems: 'center', paddingVertical: 8 },
-  guestButtonText: { color: '#e9d5ff', fontSize: 14, fontWeight: '500' },
+  guestButtonText: { color: '#AFAFAF', fontSize: 14, fontWeight: '900' },
 
   formContainer: { flex: 1, padding: 24 },
-  backButton: { paddingVertical: 12, marginBottom: 20 },
-  backButtonText: { color: 'rgba(255,255,255,0.8)', fontSize: 16 },
+  formHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+  backButton: { padding: 8 },
+  backButtonText: { color: '#AFAFAF', fontSize: 24, fontWeight: '900' },
+  formTitleHeader: { fontSize: 24, fontWeight: '900', color: '#4B4B4B' },
   formContent: { flex: 1, justifyContent: 'center' },
-  formEmoji: { fontSize: 40, textAlign: 'center', marginBottom: 16 },
-  formTitle: { fontSize: 28, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 8 },
-  formSubtitle: { fontSize: 15, color: '#e9d5ff', textAlign: 'center', marginBottom: 32 },
-  socialButton: { backgroundColor: '#fff', paddingVertical: 14, borderRadius: 16, alignItems: 'center', marginBottom: 12 },
-  socialButtonText: { color: '#374151', fontSize: 16, fontWeight: '600' },
+  formSubtitle: { fontSize: 16, color: '#AFAFAF', textAlign: 'center', marginBottom: 32, fontWeight: '700' },
+  
+  socialButton: { backgroundColor: '#FFFFFF', paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginBottom: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5' },
+  socialButtonText: { color: '#4B4B4B', fontSize: 15, fontWeight: '900' },
+  
   divider: { flexDirection: 'row', alignItems: 'center', marginVertical: 24 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.2)' },
-  dividerText: { color: 'rgba(255,255,255,0.5)', marginHorizontal: 16, fontSize: 14 },
-  input: { backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: 16, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', marginBottom: 16 },
-  submitButton: { backgroundColor: '#fff', paddingVertical: 16, borderRadius: 16, alignItems: 'center', marginTop: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10, elevation: 5 },
-  submitButtonText: { color: '#7e22ce', fontSize: 16, fontWeight: 'bold' },
-  switchModeContainer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  switchModeText: { color: '#e9d5ff', fontSize: 14 },
-  switchModeLink: { color: '#fff', fontSize: 14, fontWeight: 'bold', textDecorationLine: 'underline' }
+  dividerLine: { flex: 1, height: 2, backgroundColor: '#E5E5E5' },
+  dividerText: { color: '#AFAFAF', marginHorizontal: 16, fontSize: 14, fontWeight: '900' },
+  
+  input: { backgroundColor: '#F7F7F7', color: '#4B4B4B', fontSize: 16, fontWeight: '700', padding: 18, borderRadius: 16, borderWidth: 2, borderColor: '#E5E5E5', marginBottom: 16 },
+  
+  submitButton: { backgroundColor: '#58CC02', paddingVertical: 18, borderRadius: 16, alignItems: 'center', marginTop: 8, borderWidth: 2, borderColor: '#58CC02', borderBottomWidth: 5, borderBottomColor: '#58A700' },
+  submitButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' }
 });

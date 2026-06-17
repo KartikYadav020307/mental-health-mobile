@@ -46,12 +46,12 @@ const reminderTimes = [
 ];
 
 const personas: Record<string, { name: string; emoji: string; desc: string; colors: readonly [string, string] }> = {
-  stress: { name: 'Stress Soother', emoji: '🌿', desc: "You're seeking peace amid life's demands. We'll start with calming breathwork and gentle stress-release practices tailored just for you.", colors: ['#34d399', '#14b8a6'] },
-  sleep: { name: 'Dream Seeker', emoji: '🌙', desc: "Rest is your superpower, and we'll help you reclaim it. Your journey begins with sleep-focused sessions and a personalized wind-down routine.", colors: ['#6366f1', '#9333ea'] },
-  focus: { name: 'Focus Finder', emoji: '🎯', desc: "Clarity and concentration are within reach. We'll build your focus muscle one session at a time with targeted mindfulness practices.", colors: ['#facc15', '#f97316'] },
-  resilience: { name: 'Resilience Builder', emoji: '💪', desc: "You're here to grow stronger from the inside out. Your path includes emotional regulation tools, CBT exercises, and compassion practices.", colors: ['#fb7185', '#ec4899'] },
-  emotions: { name: 'Emotional Explorer', emoji: '💙', desc: "You're brave enough to face your inner world. We'll guide you with compassionate practices to process, understand, and befriend your emotions.", colors: ['#60a5fa', '#6366f1'] },
-  explore: { name: 'Mindful Explorer', emoji: '✨', desc: "Curiosity is the perfect place to start. We'll take you on a personalized tour of mindfulness — from basics to sleep to self-compassion — at your own pace.", colors: ['#a78bfa', '#a855f7'] },
+  stress: { name: 'Stress Soother', emoji: '🌿', desc: "You're seeking peace amid life's demands. We'll start with calming breathwork and gentle stress-release practices tailored just for you.", colors: ['#58CC02', '#58A700'] },
+  sleep: { name: 'Dream Seeker', emoji: '🌙', desc: "Rest is your superpower, and we'll help you reclaim it. Your journey begins with sleep-focused sessions and a personalized wind-down routine.", colors: ['#1CB0F6', '#1899D6'] },
+  focus: { name: 'Focus Finder', emoji: '🎯', desc: "Clarity and concentration are within reach. We'll build your focus muscle one session at a time with targeted mindfulness practices.", colors: ['#FFC800', '#E5B400'] },
+  resilience: { name: 'Resilience Builder', emoji: '💪', desc: "You're here to grow stronger from the inside out. Your path includes emotional regulation tools, CBT exercises, and compassion practices.", colors: ['#FF4B4B', '#E54343'] },
+  emotions: { name: 'Emotional Explorer', emoji: '💙', desc: "You're brave enough to face your inner world. We'll guide you with compassionate practices to process, understand, and befriend your emotions.", colors: ['#1CB0F6', '#1899D6'] },
+  explore: { name: 'Mindful Explorer', emoji: '✨', desc: "Curiosity is the perfect place to start. We'll take you on a personalized tour of mindfulness — from basics to sleep to self-compassion — at your own pace.", colors: ['#CE82FF', '#B874E5'] },
 };
 
 const TOTAL_STEPS = 6;
@@ -66,6 +66,17 @@ export default function OnboardingScreen() {
   const [reminder, setReminder] = useState('');
 
   const persona = selectedGoals.length > 0 ? personas[selectedGoals[0]] : personas['explore'];
+
+  const isSelectionEmpty = () => {
+    switch (step) {
+      case 0: return selectedGoals.length === 0;
+      case 1: return experience === '';
+      case 2: return mood === 0;
+      case 3: return time === '';
+      case 4: return reminder === '';
+      default: return false;
+    }
+  };
 
   const goNext = () => {
     if (step < TOTAL_STEPS - 1) {
@@ -90,25 +101,21 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <LinearGradient colors={['#f5f3ff', '#faf5ff', '#eef2ff']} style={styles.container}>
+    <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={goPrev} style={styles.backButton}>
-            <Text style={styles.backText}>← Back</Text>
+            <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
           <View style={styles.progressContainer}>
-            {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-              <View key={i} style={[styles.progressDot, i <= step && styles.progressDotActive]} />
-            ))}
+            <View style={[styles.progressFill, { width: `${((step + 1) / TOTAL_STEPS) * 100}%` }]} />
           </View>
-          <Text style={styles.stepText}>{step + 1}/{TOTAL_STEPS}</Text>
         </View>
 
         <ScrollView contentContainerStyle={styles.content} bounces={false}>
           {step === 0 && (
             <View style={styles.stepContainer}>
               <View style={styles.stepHeader}>
-                <Text style={styles.emojiIcon}>🌟</Text>
                 <Text style={styles.title}>What brings you here?</Text>
                 <Text style={styles.subtitle}>Select all that apply</Text>
               </View>
@@ -125,7 +132,7 @@ export default function OnboardingScreen() {
                     >
                       <Text style={styles.cardEmoji}>{goal.emoji}</Text>
                       <Text style={[styles.cardLabel, isSelected && styles.cardLabelActive]}>{goal.label}</Text>
-                      {isSelected && <Text style={styles.checkIcon}>✓</Text>}
+                      {isSelected && <View style={styles.checkIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -136,7 +143,6 @@ export default function OnboardingScreen() {
           {step === 1 && (
             <View style={styles.stepContainer}>
               <View style={styles.stepHeader}>
-                <Text style={styles.emojiIcon}>🧘</Text>
                 <Text style={styles.title}>Your experience level?</Text>
                 <Text style={styles.subtitle}>No right or wrong answer</Text>
               </View>
@@ -148,15 +154,12 @@ export default function OnboardingScreen() {
                     <TouchableOpacity
                       key={level.id}
                       style={[styles.listCard, isSelected && styles.cardActive]}
-                      onPress={() => {
-                        setExperience(level.id);
-                        setTimeout(goNext, 300);
-                      }}
+                      onPress={() => setExperience(level.id)}
                       activeOpacity={0.7}
                     >
                       <Text style={styles.listCardEmoji}>{level.emoji}</Text>
                       <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{level.label}</Text>
-                      {isSelected && <Text style={styles.listCheckIcon}>✓</Text>}
+                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -167,7 +170,6 @@ export default function OnboardingScreen() {
           {step === 2 && (
             <View style={styles.stepContainer}>
               <View style={styles.stepHeader}>
-                <Text style={styles.emojiIcon}>💭</Text>
                 <Text style={styles.title}>How are you feeling lately?</Text>
                 <Text style={styles.subtitle}>Be honest — this helps us personalize your experience</Text>
               </View>
@@ -179,10 +181,7 @@ export default function OnboardingScreen() {
                     <TouchableOpacity
                       key={m.score}
                       style={[styles.moodItem, isSelected && styles.moodItemActive]}
-                      onPress={() => {
-                        setMood(m.score);
-                        setTimeout(goNext, 300);
-                      }}
+                      onPress={() => setMood(m.score)}
                       activeOpacity={0.7}
                     >
                       <Text style={[styles.moodEmoji, isSelected && styles.moodEmojiActive]}>
@@ -201,7 +200,6 @@ export default function OnboardingScreen() {
           {step === 3 && (
             <View style={styles.stepContainer}>
               <View style={styles.stepHeader}>
-                <Text style={styles.emojiIcon}>⏱️</Text>
                 <Text style={styles.title}>Time to commit?</Text>
                 <Text style={styles.subtitle}>Even 5 minutes makes a real difference</Text>
               </View>
@@ -213,15 +211,12 @@ export default function OnboardingScreen() {
                     <TouchableOpacity
                       key={opt.id}
                       style={[styles.timeCard, isSelected && styles.cardActive]}
-                      onPress={() => {
-                        setTime(opt.id);
-                        setTimeout(goNext, 300);
-                      }}
+                      onPress={() => setTime(opt.id)}
                       activeOpacity={0.7}
                     >
                       {opt.recommended && (
                         <View style={styles.recommendedBadge}>
-                          <Text style={styles.recommendedBadgeText}>Most popular</Text>
+                          <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
                         </View>
                       )}
                       <Text style={styles.timeCardEmoji}>{opt.emoji}</Text>
@@ -237,7 +232,6 @@ export default function OnboardingScreen() {
           {step === 4 && (
             <View style={styles.stepContainer}>
               <View style={styles.stepHeader}>
-                <Text style={styles.emojiIcon}>🔔</Text>
                 <Text style={styles.title}>Best time for your reminder?</Text>
                 <Text style={styles.subtitle}>We'll send a gentle nudge at your chosen time</Text>
               </View>
@@ -249,10 +243,7 @@ export default function OnboardingScreen() {
                     <TouchableOpacity
                       key={rt.id}
                       style={[styles.listCard, isSelected && styles.cardActive]}
-                      onPress={() => {
-                        setReminder(rt.id);
-                        setTimeout(goNext, 300);
-                      }}
+                      onPress={() => setReminder(rt.id)}
                       activeOpacity={0.7}
                     >
                       <Text style={styles.listCardEmoji}>{rt.emoji}</Text>
@@ -260,13 +251,13 @@ export default function OnboardingScreen() {
                         <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{rt.label}</Text>
                         <Text style={[styles.reminderTimeText, isSelected && styles.timeCardDescActive]}>{rt.time}</Text>
                       </View>
-                      {isSelected && <Text style={styles.listCheckIcon}>✓</Text>}
+                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
               </View>
               <TouchableOpacity onPress={goNext} style={styles.skipButton}>
-                <Text style={styles.skipButtonText}>Skip for now →</Text>
+                <Text style={styles.skipButtonText}>SKIP</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -277,8 +268,8 @@ export default function OnboardingScreen() {
                 <Text style={{ fontSize: 64 }}>{persona.emoji}</Text>
               </LinearGradient>
 
-              <Text style={styles.personaPretitle}>YOU ARE A</Text>
-              <Text style={styles.personaTitle}>{persona.name} {persona.emoji}</Text>
+              <Text style={styles.personaPretitle}>YOUR PROFILE</Text>
+              <Text style={styles.personaTitle}>{persona.name}</Text>
               <Text style={styles.personaDesc}>{persona.desc}</Text>
 
               <View style={styles.summaryBox}>
@@ -288,7 +279,7 @@ export default function OnboardingScreen() {
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryIcon}>⏱️</Text>
-                  <Text style={styles.summaryText}>Daily commitment: <Text style={styles.summaryTextBold}>{time || '10'} min</Text></Text>
+                  <Text style={styles.summaryText}>Commitment: <Text style={styles.summaryTextBold}>{time || '10'} min / day</Text></Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryIcon}>🔔</Text>
@@ -301,82 +292,82 @@ export default function OnboardingScreen() {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            style={[styles.continueButton, (step === 0 && selectedGoals.length === 0) && styles.continueButtonDisabled, step === 5 && { backgroundColor: persona.colors[1] }]}
-            disabled={step === 0 && selectedGoals.length === 0}
+            style={[styles.continueButton, isSelectionEmpty() && styles.continueButtonDisabled]}
+            disabled={isSelectionEmpty()}
             onPress={goNext}
+            activeOpacity={0.8}
           >
-            <Text style={styles.continueText}>{step === TOTAL_STEPS - 1 ? 'Begin My Journey ✨' : 'Continue →'}</Text>
+            <Text style={[styles.continueText, isSelectionEmpty() && styles.continueTextDisabled]}>{step === TOTAL_STEPS - 1 ? 'CONTINUE' : 'CONTINUE'}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 8 },
-  backButton: { marginRight: 16 },
-  backText: { color: '#a78bfa', fontSize: 14, fontWeight: '600' },
-  progressContainer: { flex: 1, flexDirection: 'row', gap: 6, marginRight: 16 },
-  progressDot: { flex: 1, height: 6, backgroundColor: '#ddd6fe', borderRadius: 3 },
-  progressDotActive: { backgroundColor: '#8b5cf6' },
-  stepText: { color: '#a78bfa', fontSize: 14, fontWeight: '600' },
+  backButton: { marginRight: 16, padding: 8 },
+  backText: { color: '#AFAFAF', fontSize: 24, fontWeight: '900' },
+  progressContainer: { flex: 1, height: 16, backgroundColor: '#E5E5E5', borderRadius: 8, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: '#58CC02', borderRadius: 8 },
   
   content: { paddingHorizontal: 24, paddingTop: 24, paddingBottom: 40 },
   stepContainer: { flex: 1 },
   stepHeader: { marginBottom: 32 },
-  emojiIcon: { fontSize: 40, marginBottom: 12 },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#6b7280' },
+  title: { fontSize: 28, fontWeight: '800', color: '#4B4B4B', marginBottom: 8, textAlign: 'center' },
+  subtitle: { fontSize: 16, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
   
-  gridContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  card: { width: '48%', backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#f3f4f6', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2, position: 'relative' },
-  cardActive: { backgroundColor: '#8b5cf6', borderColor: '#8b5cf6', shadowColor: '#8b5cf6', shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-  cardEmoji: { fontSize: 24, marginBottom: 8 },
-  cardLabel: { fontSize: 14, fontWeight: '600', color: '#374151' },
-  cardLabelActive: { color: '#fff' },
-  checkIcon: { position: 'absolute', top: 12, right: 12, color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  gridContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
+  card: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', position: 'relative', alignItems: 'center' },
+  cardActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02', borderBottomColor: '#58A700' },
+  cardEmoji: { fontSize: 32, marginBottom: 12 },
+  cardLabel: { fontSize: 15, fontWeight: '800', color: '#4B4B4B', textAlign: 'center' },
+  cardLabelActive: { color: '#58CC02' },
+  checkIconContainer: { position: 'absolute', top: 8, right: 8, backgroundColor: '#58CC02', width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  checkIcon: { color: '#FFFFFF', fontSize: 14, fontWeight: '900' },
 
   listContainer: { gap: 12 },
-  listCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#f3f4f6', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 },
+  listCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5' },
   listCardEmoji: { fontSize: 28, marginRight: 16 },
-  listCardLabel: { fontSize: 16, fontWeight: '600', color: '#374151' },
-  listCheckIcon: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  reminderTimeText: { fontSize: 14, color: '#9ca3af', marginTop: 4 },
+  listCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', flex: 1 },
+  listCheckIconContainer: { backgroundColor: '#58CC02', width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  reminderTimeText: { fontSize: 14, color: '#AFAFAF', marginTop: 4, fontWeight: '700' },
 
-  moodContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, paddingHorizontal: 10 },
-  moodItem: { alignItems: 'center', flex: 1 },
-  moodItemActive: { transform: [{ scale: 1.1 }] },
-  moodEmoji: { fontSize: 36, marginBottom: 8, opacity: 0.8 },
-  moodEmojiActive: { fontSize: 52, opacity: 1 },
-  moodLabel: { fontSize: 12, fontWeight: '600', color: '#9ca3af' },
-  moodLabelActive: { color: '#7c3aed' },
+  moodContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, gap: 8 },
+  moodItem: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', alignItems: 'center' },
+  moodItemActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02', borderBottomColor: '#58A700' },
+  moodEmoji: { fontSize: 28, marginBottom: 8 },
+  moodEmojiActive: { fontSize: 32 },
+  moodLabel: { fontSize: 12, fontWeight: '800', color: '#AFAFAF' },
+  moodLabelActive: { color: '#58CC02' },
 
-  timeCard: { width: '48%', backgroundColor: '#fff', borderRadius: 16, padding: 20, alignItems: 'center', borderWidth: 2, borderColor: '#f3f4f6', position: 'relative' },
+  timeCard: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, alignItems: 'center', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', position: 'relative' },
   timeCardEmoji: { fontSize: 32, marginBottom: 12 },
-  timeCardLabel: { fontSize: 16, fontWeight: 'bold', color: '#374151', marginBottom: 4 },
-  timeCardDesc: { fontSize: 12, color: '#9ca3af', textAlign: 'center' },
-  timeCardDescActive: { color: '#e9d5ff' },
-  recommendedBadge: { position: 'absolute', top: -10, backgroundColor: '#f97316', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, zIndex: 10 },
-  recommendedBadgeText: { color: '#fff', fontSize: 10, fontWeight: 'bold' },
+  timeCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', marginBottom: 4 },
+  timeCardDesc: { fontSize: 13, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
+  timeCardDescActive: { color: '#58CC02' },
+  recommendedBadge: { position: 'absolute', top: -12, backgroundColor: '#FFC800', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, borderWidth: 2, borderColor: '#FFFFFF', zIndex: 10 },
+  recommendedBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '900' },
 
   skipButton: { marginTop: 24, alignItems: 'center', padding: 12 },
-  skipButtonText: { color: '#9ca3af', fontSize: 15, fontWeight: '600' },
+  skipButtonText: { color: '#AFAFAF', fontSize: 15, fontWeight: '800' },
 
-  personaAvatar: { width: 128, height: 128, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 15, elevation: 8 },
-  personaPretitle: { fontSize: 12, fontWeight: 'bold', color: '#8b5cf6', letterSpacing: 1, marginBottom: 4 },
-  personaTitle: { fontSize: 32, fontWeight: 'bold', color: '#111827', marginBottom: 16, textAlign: 'center' },
-  personaDesc: { fontSize: 16, color: '#6b7280', textAlign: 'center', lineHeight: 24, marginBottom: 32, paddingHorizontal: 16 },
+  personaAvatar: { width: 120, height: 120, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 8 },
+  personaPretitle: { fontSize: 14, fontWeight: '900', color: '#AFAFAF', letterSpacing: 1, marginBottom: 8 },
+  personaTitle: { fontSize: 32, fontWeight: '900', color: '#4B4B4B', marginBottom: 16, textAlign: 'center' },
+  personaDesc: { fontSize: 16, color: '#AFAFAF', textAlign: 'center', lineHeight: 24, marginBottom: 32, paddingHorizontal: 16, fontWeight: '600' },
   
-  summaryBox: { backgroundColor: '#fff', width: '100%', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#f3f4f6' },
-  summaryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  summaryIcon: { fontSize: 18, marginRight: 12 },
-  summaryText: { fontSize: 15, color: '#4b5563' },
-  summaryTextBold: { fontWeight: 'bold', color: '#111827' },
+  summaryBox: { backgroundColor: '#FFFFFF', width: '100%', borderRadius: 20, padding: 24, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5' },
+  summaryRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  summaryIcon: { fontSize: 24, marginRight: 16 },
+  summaryText: { fontSize: 16, color: '#AFAFAF', fontWeight: '700' },
+  summaryTextBold: { fontWeight: '900', color: '#4B4B4B' },
 
-  footer: { padding: 24, paddingTop: 8 },
-  continueButton: { backgroundColor: '#7c3aed', paddingVertical: 16, borderRadius: 16, alignItems: 'center', shadowColor: '#7c3aed', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 5 },
-  continueButtonDisabled: { opacity: 0.4, shadowOpacity: 0 },
-  continueText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  footer: { padding: 24, paddingTop: 16, backgroundColor: '#FFFFFF', borderTopWidth: 2, borderTopColor: '#E5E5E5' },
+  continueButton: { backgroundColor: '#58CC02', paddingVertical: 18, borderRadius: 16, alignItems: 'center', borderBottomWidth: 5, borderBottomColor: '#58A700' },
+  continueButtonDisabled: { backgroundColor: '#E5E5E5', borderBottomColor: '#D3D3D3' },
+  continueText: { color: '#FFFFFF', fontSize: 18, fontWeight: '900' },
+  continueTextDisabled: { color: '#AFAFAF' },
 });
