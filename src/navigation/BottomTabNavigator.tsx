@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../components/BottomNav';
+import HomeScreen from '../screens/HomeScreen';
 
 // Placeholder screens
 const PlaceholderScreen = ({ name }: { name: string }) => (
@@ -10,7 +12,6 @@ const PlaceholderScreen = ({ name }: { name: string }) => (
   </View>
 );
 
-const HomeScreen = () => <PlaceholderScreen name="Home" />;
 const ExploreScreen = () => <PlaceholderScreen name="Explore" />;
 const SleepScreen = () => <PlaceholderScreen name="Sleep" />;
 const ProgressScreen = () => <PlaceholderScreen name="Progress" />;
@@ -21,28 +22,10 @@ const Tab = createBottomTabNavigator();
 export default function BottomTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap = 'home';
-
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Explore') {
-            iconName = focused ? 'headset' : 'headset-outline';
-          } else if (route.name === 'Sleep') {
-            iconName = focused ? 'moon' : 'moon-outline';
-          } else if (route.name === 'Progress') {
-            iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#7c3aed', // matches the purple/violet theme
-        tabBarInactiveTintColor: 'gray',
-        headerShown: true,
-      })}
+      tabBar={(props) => <BottomNav {...props} />}
+      screenOptions={{
+        headerShown: false,
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
