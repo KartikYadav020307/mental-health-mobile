@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Keyb
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function AuthScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -13,6 +14,23 @@ export default function AuthScreen() {
 
   const handleGuest = () => {
     navigation.replace('Onboarding');
+  };
+
+  const handleLogin = async () => {
+    try {
+      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      navigation.replace('MainTabs');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAuthSubmit = async () => {
+    if (mode === 'signup') {
+      navigation.replace('Onboarding');
+    } else {
+      await handleLogin();
+    }
   };
 
   return (
@@ -63,10 +81,10 @@ export default function AuthScreen() {
                 <View style={styles.formContent}>
                   <Text style={styles.formSubtitle}>{mode === 'signup' ? 'Start your wellness journey today' : 'Continue your practice'}</Text>
 
-                  <TouchableOpacity style={styles.socialButton} onPress={handleGuest} activeOpacity={0.8}>
+                  <TouchableOpacity style={styles.socialButton} onPress={handleLogin} activeOpacity={0.8}>
                     <Text style={styles.socialButtonText}>CONTINUE WITH GOOGLE</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#1A1F2B', borderBottomColor: '#000000', borderColor: '#1A1F2B' }]} onPress={handleGuest} activeOpacity={0.8}>
+                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#1A1F2B', borderBottomColor: '#000000', borderColor: '#1A1F2B' }]} onPress={handleLogin} activeOpacity={0.8}>
                     <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>CONTINUE WITH APPLE</Text>
                   </TouchableOpacity>
 
@@ -103,7 +121,7 @@ export default function AuthScreen() {
                     secureTextEntry
                   />
 
-                  <TouchableOpacity style={styles.submitButton} onPress={handleGuest} activeOpacity={0.8}>
+                  <TouchableOpacity style={styles.submitButton} onPress={handleAuthSubmit} activeOpacity={0.8}>
                     <Text style={styles.submitButtonText}>{mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN'}</Text>
                   </TouchableOpacity>
                 </View>

@@ -5,17 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../components/BottomNav';
 import HomeScreen from '../screens/HomeScreen';
 
-// Placeholder screens
-const PlaceholderScreen = ({ name }: { name: string }) => (
-  <View style={styles.container}>
-    <Text style={styles.text}>{name} Screen</Text>
-  </View>
-);
-
-const ExploreScreen = () => <PlaceholderScreen name="Explore" />;
-const SleepScreen = () => <PlaceholderScreen name="Sleep" />;
-const ProgressScreen = () => <PlaceholderScreen name="Progress" />;
-const ProfileScreen = () => <PlaceholderScreen name="Profile" />;
+import ExploreScreen from '../screens/ExploreScreen';
+import SleepScreen from '../screens/SleepScreen';
+import ProgressScreen from '../screens/ProgressScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 

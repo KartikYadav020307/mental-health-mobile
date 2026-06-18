@@ -1,12 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
 
 export default function SplashScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
@@ -38,12 +34,7 @@ export default function SplashScreen() {
         ])
       )
     ]).start();
-
-    const timer = setTimeout(() => {
-      navigation.replace('Auth');
-    }, 2800);
-    return () => clearTimeout(timer);
-  }, [navigation]);
+  }, []);
 
   return (
     <LinearGradient

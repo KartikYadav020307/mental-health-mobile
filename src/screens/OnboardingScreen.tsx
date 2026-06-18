@@ -4,6 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -78,11 +79,16 @@ export default function OnboardingScreen() {
     }
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step < TOTAL_STEPS - 1) {
       setStep(s => s + 1);
     } else {
-      navigation.replace('WelcomeBreath');
+      try {
+        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      } catch (e) {
+        console.error(e);
+      }
+      navigation.replace('MainTabs');
     }
   };
 
