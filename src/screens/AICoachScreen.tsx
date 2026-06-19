@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { supabase } from '../lib/supabase';
 
 const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ 
@@ -24,6 +25,36 @@ export default function AICoachScreen() {
     { id: '1', text: "Hi Alex! I'm Serenova, your AI Coach. How are you feeling today?", isUser: false },
   ]);
 
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const loadedMessages: Message[] = data.map((msg: any) => ({
+            id: msg.id.toString(),
+            text: msg.content,
+            isUser: msg.role === 'user',
+          }));
+          setMessages(loadedMessages);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      }
+    };
+    
+    loadHistory();
+  }, []);
+
   const handleSend = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -34,6 +65,12 @@ export default function AICoachScreen() {
     setIsLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        await supabase.from('chat_messages').insert({ user_id: user.id, role: 'user', content: userText }).catch(console.error);
+      }
+
       const result = await model.generateContent(userText);
       const aiText = result.response.text();
       
@@ -43,6 +80,10 @@ export default function AICoachScreen() {
         isUser: false 
       };
       setMessages((prev) => [...prev, aiResponse]);
+
+      if (user) {
+        await supabase.from('chat_messages').insert({ user_id: user.id, role: 'model', content: aiText }).catch(console.error);
+      }
     } catch (error) {
       console.error('Gemini API Error:', error);
       const errorResponse: Message = { 
