@@ -7,6 +7,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import BottomTabNavigator from './BottomTabNavigator';
 import AICoachScreen from '../screens/AICoachScreen';
 import AudioPlayerScreen from '../screens/AudioPlayerScreen';
+import JournalScreen from '../screens/JournalScreen';
 import { RootStackParamList } from './types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -54,6 +55,7 @@ export default function RootNavigator() {
       <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
       <Stack.Screen name="AICoach" component={AICoachScreen} options={{ presentation: 'modal' }} />
       <Stack.Screen name="AudioPlayer" component={AudioPlayerScreen} options={{ presentation: 'modal' }} />
+      <Stack.Screen name="Journal" component={JournalScreen} />
     </Stack.Navigator>
   );
 }

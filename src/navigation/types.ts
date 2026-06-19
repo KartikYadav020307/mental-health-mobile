@@ -5,4 +5,5 @@ export type RootStackParamList = {
   MainTabs: undefined;
   AICoach: undefined;
   AudioPlayer: { title: string };
+  Journal: undefined;
 };

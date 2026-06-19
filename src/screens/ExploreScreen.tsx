@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
-const categories = ['Anxiety', 'Focus', 'Growth', 'SOS'];
+const categories = ['Anxiety', 'Focus', 'Growth', 'SOS', 'Tools'];
 
 const courses = [
   { id: '1', title: 'Overcoming Panic', xp: '+150 XP', icon: 'lungs', category: 'Anxiety' },
@@ -14,6 +14,7 @@ const courses = [
   { id: '4', title: 'Immediate Relief', xp: '+50 XP', icon: 'life-ring', category: 'SOS' },
   { id: '5', title: 'Social Anxiety', xp: '+150 XP', icon: 'users', category: 'Anxiety' },
   { id: '6', title: 'Flow State', xp: '+250 XP', icon: 'water', category: 'Focus' },
+  { id: '7', title: 'Secure Journal', xp: 'Private', icon: 'book', category: 'Tools', route: 'Journal' },
 ];
 
 export default function ExploreScreen() {
@@ -79,7 +80,7 @@ export default function ExploreScreen() {
               key={course.id} 
               style={styles.courseCard} 
               activeOpacity={0.8}
-              onPress={() => navigation.navigate('AudioPlayer', { title: course.title })}
+              onPress={() => course.route ? navigation.navigate(course.route as never) : navigation.navigate('AudioPlayer', { title: course.title })}
             >
               <View style={styles.iconWrapper}>
                 <FontAwesome5 name={course.icon} size={32} color="#1CB0F6" solid />
