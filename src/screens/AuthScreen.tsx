@@ -18,7 +18,36 @@ export default function AuthScreen() {
     navigation.replace('Onboarding');
   };
 
-  const handleAuthSubmit = async () => {
+  const handleSignUp = async () => {
+    console.log('Sign Up Button Pressed');
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      navigation.replace('Onboarding');
+    } catch (error: any) {
+      Alert.alert('Sign Up Error', error.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Missing Fields', 'Please enter your email and password.');
       return;
@@ -26,31 +55,15 @@ export default function AuthScreen() {
 
     setLoading(true);
     try {
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: name,
-            }
-          }
-        });
-        
-        if (error) throw error;
-        
-        navigation.replace('Onboarding');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
-        
-        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-        navigation.replace('MainTabs');
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+      navigation.replace('MainTabs');
     } catch (error: any) {
       Alert.alert('Authentication Error', error.message || 'An unexpected error occurred.');
     } finally {
@@ -149,16 +162,29 @@ export default function AuthScreen() {
                     editable={!loading}
                   />
 
-                  <TouchableOpacity 
-                    style={[styles.submitButton, loading && { opacity: 0.6 }]} 
-                    onPress={handleAuthSubmit} 
-                    activeOpacity={0.8}
-                    disabled={loading}
-                  >
-                    <Text style={styles.submitButtonText}>
-                      {loading ? 'PLEASE WAIT...' : (mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN')}
-                    </Text>
-                  </TouchableOpacity>
+                  {mode === 'signup' ? (
+                    <TouchableOpacity 
+                      style={[styles.submitButton, loading && { opacity: 0.6 }]} 
+                      onPress={handleSignUp} 
+                      activeOpacity={0.8}
+                      disabled={loading}
+                    >
+                      <Text style={styles.submitButtonText}>
+                        {loading ? 'PLEASE WAIT...' : 'CREATE ACCOUNT'}
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity 
+                      style={[styles.submitButton, loading && { opacity: 0.6 }]} 
+                      onPress={handleLogin} 
+                      activeOpacity={0.8}
+                      disabled={loading}
+                    >
+                      <Text style={styles.submitButtonText}>
+                        {loading ? 'PLEASE WAIT...' : 'SIGN IN'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             )}

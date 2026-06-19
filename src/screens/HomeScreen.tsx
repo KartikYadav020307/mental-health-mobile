@@ -1,8 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { supabase } from '../lib/supabase';
 
 const HomeScreen = () => {
+  const [isMoodLogged, setIsMoodLogged] = useState(false);
+
+  const handleMoodSelection = async (moodValue: number) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase.from('mood_logs').insert({
+        user_id: user.id,
+        mood_value: moodValue,
+      });
+
+      if (error) throw error;
+      
+      setIsMoodLogged(true);
+    } catch (error) {
+      console.error('Error logging mood:', error);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header - Stats Bar */}
@@ -72,16 +93,41 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
         
-        {/* Daily Challenge equivalent as a big bouncy card */}
-        <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-          <View style={styles.cardIconContainer}>
-            <MaterialCommunityIcons name="target" size={40} color="#FFC800" />
+        {/* Mood Tracker / Daily Challenge */}
+        {isMoodLogged ? (
+          <View style={[styles.card, styles.successCard]}>
+            <View style={styles.cardIconContainer}>
+              <FontAwesome5 name="check-circle" size={40} color="#FFFFFF" solid />
+            </View>
+            <View style={styles.cardTextContainer}>
+              <Text style={styles.successCardTitle}>Mood Logged! +10 XP</Text>
+            </View>
           </View>
-          <View style={styles.cardTextContainer}>
-            <Text style={styles.cardTitle}>Daily Challenge</Text>
-            <Text style={styles.cardSubtitle}>Log your mood today</Text>
+        ) : (
+          <View style={[styles.card, { flexDirection: 'column', alignItems: 'flex-start' }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+              <View style={styles.cardIconContainer}>
+                <MaterialCommunityIcons name="target" size={40} color="#FFC800" />
+              </View>
+              <View style={styles.cardTextContainer}>
+                <Text style={styles.cardTitle}>Daily Challenge</Text>
+                <Text style={styles.cardSubtitle}>Log your mood today</Text>
+              </View>
+            </View>
+            <View style={styles.moodEmojisRow}>
+              {[{v: 1, e: '😢'}, {v: 2, e: '😕'}, {v: 3, e: '😐'}, {v: 4, e: '🙂'}, {v: 5, e: '😄'}].map(mood => (
+                <TouchableOpacity 
+                  key={mood.v} 
+                  style={styles.moodEmojiButton} 
+                  activeOpacity={0.8}
+                  onPress={() => handleMoodSelection(mood.v)}
+                >
+                  <Text style={styles.moodEmojiText}>{mood.e}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </TouchableOpacity>
+        )}
 
       </ScrollView>
     </SafeAreaView>
@@ -259,6 +305,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 8,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  successCard: {
+    backgroundColor: '#58CC02',
+    borderColor: '#58CC02',
+    borderBottomColor: '#58A700',
+  },
+  successCardTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFFFFF',
+  },
+  moodEmojisRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  moodEmojiButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#F7F7F7',
+    borderWidth: 2,
+    borderColor: '#E5E5E5',
+    borderBottomWidth: 4,
+    borderBottomColor: '#D1D1D1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  moodEmojiText: {
+    fontSize: 24,
   }
 });
 
