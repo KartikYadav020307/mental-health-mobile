@@ -6,6 +6,10 @@ import {
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
+const emModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
 type JournalEntry = {
   id: string;
@@ -60,12 +64,21 @@ export default function JournalScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      let embedding: number[] | null = null;
+      try {
+        const result = await emModel.embedContent(newContent.trim());
+        embedding = result.embedding.values;
+      } catch (err) {
+        console.error('Embedding failed, saving without vector:', err);
+      }
+
       const { error } = await supabase
         .from('journal_entries')
         .insert({
           user_id: user.id,
           title: newTitle.trim(),
-          content: newContent.trim()
+          content: newContent.trim(),
+          ...(embedding ? { embedding } : {})
         });
 
       if (error) throw error;

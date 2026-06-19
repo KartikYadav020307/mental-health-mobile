@@ -10,6 +10,7 @@ const model = genAI.getGenerativeModel({
   model: 'gemini-1.5-flash',
   systemInstruction: 'You are Serenova, an empathetic, CBT-trained mental health AI coach. Keep your responses extremely concise (1-3 sentences maximum) so they fit nicely in mobile chat bubbles. Be warm, validating, and offer gentle, actionable advice. Do not use markdown bolding or bullet points.'
 });
+const emModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
 type Message = {
   id: string;
@@ -72,7 +73,33 @@ export default function AICoachScreen() {
         if (error) console.error(error);
       }
 
-      const result = await model.generateContent(userText);
+      let mappedContext = '';
+      if (user) {
+        try {
+          const emResult = await emModel.embedContent(userText);
+          const userEmbedding = emResult.embedding.values;
+
+          const { data: matchedJournals, error: rpcError } = await supabase.rpc('match_journal_entries', {
+            query_embedding: userEmbedding,
+            match_threshold: 0.5,
+            match_count: 2,
+            p_user_id: user.id
+          });
+
+          if (rpcError) throw rpcError;
+          if (matchedJournals && matchedJournals.length > 0) {
+            mappedContext = matchedJournals.map((j: any) => j.content).join('\n---\n');
+          }
+        } catch (err) {
+          console.error('Vector recall failed:', err);
+        }
+      }
+
+      const promptPayload = mappedContext 
+        ? `User context from past journal entries:\n${mappedContext}\n\nUser message: ${userText}`
+        : userText;
+
+      const result = await model.generateContent(promptPayload);
       const aiText = result.response.text();
       
       const aiResponse: Message = { 
