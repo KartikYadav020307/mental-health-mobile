@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ 
+  model: 'gemini-1.5-flash',
+  systemInstruction: 'You are Serenova, an empathetic, CBT-trained mental health AI coach. Keep your responses extremely concise (1-3 sentences maximum) so they fit nicely in mobile chat bubbles. Be warm, validating, and offer gentle, actionable advice. Do not use markdown bolding or bullet points.'
+});
 
 type Message = {
   id: string;
@@ -12,26 +19,41 @@ type Message = {
 export default function AICoachScreen() {
   const navigation = useNavigation();
   const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', text: "Hi Alex! I'm Serenova, your AI Coach. How are you feeling today?", isUser: false },
   ]);
 
-  const handleSend = () => {
-    if (!inputText.trim()) return;
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
 
-    const newUserMsg: Message = { id: Date.now().toString(), text: inputText.trim(), isUser: true };
+    const userText = inputText.trim();
+    const newUserMsg: Message = { id: Date.now().toString(), text: userText, isUser: true };
     setMessages((prev) => [...prev, newUserMsg]);
     setInputText('');
+    setIsLoading(true);
 
-    // Dummy AI simulation response
-    setTimeout(() => {
+    try {
+      const result = await model.generateContent(userText);
+      const aiText = result.response.text();
+      
       const aiResponse: Message = { 
         id: (Date.now() + 1).toString(), 
-        text: "I'm here to help you stay mindful and track your goals. Let's tackle today together!", 
+        text: aiText, 
         isUser: false 
       };
       setMessages((prev) => [...prev, aiResponse]);
-    }, 1000);
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      const errorResponse: Message = { 
+        id: (Date.now() + 1).toString(), 
+        text: "I'm having a little trouble connecting right now, but I'm here for you. Let's try again in a moment.", 
+        isUser: false 
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,8 +93,14 @@ export default function AICoachScreen() {
             value={inputText}
             onChangeText={setInputText}
             multiline
+            editable={!isLoading}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={[styles.sendButton, isLoading && { opacity: 0.6 }]} 
+            onPress={handleSend} 
+            activeOpacity={0.8}
+            disabled={isLoading}
+          >
             <FontAwesome5 name="paper-plane" size={20} color="#FFFFFF" solid />
           </TouchableOpacity>
         </View>
