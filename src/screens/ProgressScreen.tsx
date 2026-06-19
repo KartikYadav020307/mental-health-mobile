@@ -1,10 +1,105 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { supabase } from '../lib/supabase';
 
 export default function ProgressScreen() {
   const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const activeDays = [true, true, true, false, false, false, false];
+  const [activeDays, setActiveDays] = useState([false, false, false, false, false, false, false]);
+  const [totalXP, setTotalXP] = useState(0);
+  const [streakValue, setStreakValue] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const fetchProgress = async () => {
+        try {
+          setLoading(true);
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
+          const { data, error } = await supabase
+            .from('mood_logs')
+            .select('created_at')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          if (!isActive) return;
+
+          const logs = data || [];
+          
+          // 1. Calculate Total XP
+          setTotalXP(logs.length * 10);
+
+          // 2. Setup date math bounds
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+          // Weekly Calendar bounds (0 = Mon, 6 = Sun)
+          const currentDayOfWeek = (today.getDay() + 6) % 7; 
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - currentDayOfWeek);
+          
+          const newActiveDays = [false, false, false, false, false, false, false];
+          
+          const logDates = logs.map(log => {
+             const d = new Date(log.created_at);
+             return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+          });
+          
+          // Normalize to midnight UTC equivalent epoch arrays
+          const uniqueLogDates = Array.from(new Set(logDates));
+
+          // 3. Populate Weekly Calendar array
+          for (let i = 0; i < 7; i++) {
+            const dayToCheck = new Date(startOfWeek);
+            dayToCheck.setDate(startOfWeek.getDate() + i);
+            if (uniqueLogDates.includes(dayToCheck.getTime())) {
+              newActiveDays[i] = true;
+            }
+          }
+          setActiveDays(newActiveDays);
+
+          // 4. Calculate Streak
+          let streak = 0;
+          let dateToCheck = new Date(today);
+
+          if (uniqueLogDates.includes(today.getTime())) {
+             streak++;
+             dateToCheck.setDate(dateToCheck.getDate() - 1);
+          } else {
+             // If user hasn't logged today, check if streak is alive from yesterday
+             dateToCheck.setDate(dateToCheck.getDate() - 1);
+             if (uniqueLogDates.includes(dateToCheck.getTime())) {
+               streak++;
+               dateToCheck.setDate(dateToCheck.getDate() - 1);
+             }
+          }
+
+          // Count consecutively backwards
+          while (uniqueLogDates.includes(dateToCheck.getTime())) {
+             streak++;
+             dateToCheck.setDate(dateToCheck.getDate() - 1);
+          }
+
+          setStreakValue(streak);
+
+        } catch (error) {
+          console.error('Error fetching progress:', error);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+
+      fetchProgress();
+
+      return () => { isActive = false; };
+    }, [])
+  );
 
   const badges = [
     { id: 1, title: 'Early Bird', icon: 'sun', color: '#1CB0F6', shadow: '#1899D6' },
@@ -21,13 +116,13 @@ export default function ProgressScreen() {
         <View style={styles.headerCard}>
           <View style={styles.headerItem}>
             <FontAwesome5 name="fire" size={56} color="#FFC800" />
-            <Text style={styles.streakValue}>3</Text>
+            <Text style={styles.streakValue}>{loading ? '-' : streakValue}</Text>
             <Text style={styles.headerLabel}>Day Streak</Text>
           </View>
           <View style={styles.headerDivider} />
           <View style={styles.headerItem}>
             <FontAwesome5 name="bolt" size={56} color="#1CB0F6" />
-            <Text style={styles.xpValue}>450</Text>
+            <Text style={styles.xpValue}>{loading ? '-' : totalXP}</Text>
             <Text style={styles.headerLabel}>Total XP</Text>
           </View>
         </View>
