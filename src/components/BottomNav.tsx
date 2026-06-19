@@ -8,7 +8,11 @@ export default function BottomNav({ state, descriptors, navigation }: BottomTabB
     <View style={styles.wrapper}>
       {/* Absolute floating FAB for AI Coach */}
       <View style={styles.fabContainer}>
-         <TouchableOpacity style={styles.fabButton} activeOpacity={0.8}>
+         <TouchableOpacity 
+           style={styles.fabButton} 
+           activeOpacity={0.8}
+           onPress={() => navigation.navigate('AICoach' as never)}
+         >
            <FontAwesome5 name="robot" size={28} color="#fff" solid />
          </TouchableOpacity>
       </View>
