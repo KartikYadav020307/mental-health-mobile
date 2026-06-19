@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-na
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
-import { Audio } from 'expo-av';
 
 export default function AudioPlayerScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'AudioPlayer'>>();
@@ -22,7 +21,6 @@ export default function AudioPlayerScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.closeButton} onPress={handleClose} activeOpacity={0.7}>
           <FontAwesome5 name="chevron-down" size={28} color="#AFAFAF" />
@@ -30,18 +28,15 @@ export default function AudioPlayerScreen() {
       </View>
 
       <View style={styles.content}>
-        {/* Massive 3D Artwork Placeholder */}
         <View style={styles.artworkContainer}>
           <View style={styles.artworkInner}>
             <FontAwesome5 name={isPlaying ? "music" : "headphones"} size={80} color="#FFFFFF" solid />
           </View>
         </View>
 
-        {/* Track Info */}
         <Text style={styles.titleText}>{title}</Text>
         <Text style={styles.subtitleText}>Serenova Original</Text>
 
-        {/* Controls Row */}
         <View style={styles.controlsRow}>
           <TouchableOpacity style={[styles.controlButton, styles.stopButton]} onPress={handleClose} activeOpacity={0.8}>
             <FontAwesome5 name="stop" size={24} color="#FFFFFF" solid />
@@ -92,7 +87,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 100,
-    backgroundColor: '#1CB0F6', // Macaw Blue accent
+    backgroundColor: '#1CB0F6',
     borderWidth: 2,
     borderColor: '#38C0F8',
     alignItems: 'center',
