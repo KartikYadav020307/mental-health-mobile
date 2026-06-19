@@ -1,6 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 
 const sleepTracks = [
   { id: '1', title: 'Deep Sleep', subtitle: '45 min • Sleep Story', icon: 'moon' },
@@ -10,6 +13,8 @@ const sleepTracks = [
 ];
 
 export default function SleepScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -21,7 +26,12 @@ export default function SleepScreen() {
 
         <View style={styles.listContainer}>
           {sleepTracks.map(track => (
-            <TouchableOpacity key={track.id} style={styles.trackCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              key={track.id} 
+              style={styles.trackCard} 
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('AudioPlayer', { title: track.title })}
+            >
               <View style={styles.iconContainer}>
                 <FontAwesome5 name={track.icon} size={24} color="#AFAFAF" solid />
               </View>

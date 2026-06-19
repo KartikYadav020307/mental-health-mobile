@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 
 const categories = ['Anxiety', 'Focus', 'Growth', 'SOS'];
 
@@ -14,6 +17,7 @@ const courses = [
 ];
 
 export default function ExploreScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [activeCategory, setActiveCategory] = useState('Anxiety');
 
   // Simple filter for the prototype
@@ -71,7 +75,12 @@ export default function ExploreScreen() {
         {/* Course Grid */}
         <View style={styles.grid}>
           {filteredCourses.map(course => (
-            <TouchableOpacity key={course.id} style={styles.courseCard} activeOpacity={0.8}>
+            <TouchableOpacity 
+              key={course.id} 
+              style={styles.courseCard} 
+              activeOpacity={0.8}
+              onPress={() => navigation.navigate('AudioPlayer', { title: course.title })}
+            >
               <View style={styles.iconWrapper}>
                 <FontAwesome5 name={course.icon} size={32} color="#1CB0F6" solid />
               </View>

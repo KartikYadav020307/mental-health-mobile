@@ -4,4 +4,5 @@ export type RootStackParamList = {
   Onboarding: undefined;
   MainTabs: undefined;
   AICoach: undefined;
+  AudioPlayer: { title: string };
 };

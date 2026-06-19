@@ -68,7 +68,8 @@ export default function AICoachScreen() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
-        await supabase.from('chat_messages').insert({ user_id: user.id, role: 'user', content: userText }).catch(console.error);
+        const { error } = await supabase.from('chat_messages').insert({ user_id: user.id, role: 'user', content: userText });
+        if (error) console.error(error);
       }
 
       const result = await model.generateContent(userText);
@@ -82,7 +83,8 @@ export default function AICoachScreen() {
       setMessages((prev) => [...prev, aiResponse]);
 
       if (user) {
-        await supabase.from('chat_messages').insert({ user_id: user.id, role: 'model', content: aiText }).catch(console.error);
+        const { error } = await supabase.from('chat_messages').insert({ user_id: user.id, role: 'model', content: aiText });
+        if (error) console.error(error);
       }
     } catch (error) {
       console.error('Gemini API Error:', error);
