@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 
 export default function AuthScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -11,25 +12,49 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleGuest = () => {
     navigation.replace('Onboarding');
   };
 
-  const handleLogin = async () => {
-    try {
-      await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-      navigation.replace('MainTabs');
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   const handleAuthSubmit = async () => {
-    if (mode === 'signup') {
-      navigation.replace('Onboarding');
-    } else {
-      await handleLogin();
+    if (!email || !password) {
+      Alert.alert('Missing Fields', 'Please enter your email and password.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (mode === 'signup') {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name: name,
+            }
+          }
+        });
+        
+        if (error) throw error;
+        
+        navigation.replace('Onboarding');
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
+        navigation.replace('MainTabs');
+      }
+    } catch (error: any) {
+      Alert.alert('Authentication Error', error.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,10 +106,10 @@ export default function AuthScreen() {
                 <View style={styles.formContent}>
                   <Text style={styles.formSubtitle}>{mode === 'signup' ? 'Start your wellness journey today' : 'Continue your practice'}</Text>
 
-                  <TouchableOpacity style={styles.socialButton} onPress={handleLogin} activeOpacity={0.8}>
+                  <TouchableOpacity style={styles.socialButton} activeOpacity={0.8}>
                     <Text style={styles.socialButtonText}>CONTINUE WITH GOOGLE</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#1A1F2B', borderBottomColor: '#000000', borderColor: '#1A1F2B' }]} onPress={handleLogin} activeOpacity={0.8}>
+                  <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#1A1F2B', borderBottomColor: '#000000', borderColor: '#1A1F2B' }]} activeOpacity={0.8}>
                     <Text style={[styles.socialButtonText, { color: '#FFFFFF' }]}>CONTINUE WITH APPLE</Text>
                   </TouchableOpacity>
 
@@ -101,6 +126,7 @@ export default function AuthScreen() {
                       placeholderTextColor="#AFAFAF"
                       value={name}
                       onChangeText={setName}
+                      editable={!loading}
                     />
                   )}
                   <TextInput
@@ -111,6 +137,7 @@ export default function AuthScreen() {
                     onChangeText={setEmail}
                     autoCapitalize="none"
                     keyboardType="email-address"
+                    editable={!loading}
                   />
                   <TextInput
                     style={styles.input}
@@ -119,10 +146,18 @@ export default function AuthScreen() {
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry
+                    editable={!loading}
                   />
 
-                  <TouchableOpacity style={styles.submitButton} onPress={handleAuthSubmit} activeOpacity={0.8}>
-                    <Text style={styles.submitButtonText}>{mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN'}</Text>
+                  <TouchableOpacity 
+                    style={[styles.submitButton, loading && { opacity: 0.6 }]} 
+                    onPress={handleAuthSubmit} 
+                    activeOpacity={0.8}
+                    disabled={loading}
+                  >
+                    <Text style={styles.submitButtonText}>
+                      {loading ? 'PLEASE WAIT...' : (mode === 'signup' ? 'CREATE ACCOUNT' : 'SIGN IN')}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

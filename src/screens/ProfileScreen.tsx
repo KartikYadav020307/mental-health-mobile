@@ -1,8 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      await AsyncStorage.clear();
+      navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const menuItems = [
     { id: 'goals', label: 'My Goals', icon: 'bullseye', color: '#58CC02' },
     { id: 'preferences', label: 'Preferences', icon: 'cog', color: '#1CB0F6' },
@@ -62,7 +79,7 @@ export default function ProfileScreen() {
           ))}
 
           {/* Log Out Button - Soft Red Theme */}
-          <TouchableOpacity style={[styles.menuButton, styles.logOutButton]} activeOpacity={0.8}>
+          <TouchableOpacity style={[styles.menuButton, styles.logOutButton]} activeOpacity={0.8} onPress={handleLogout}>
             <View style={styles.logOutIconContainer}>
               <FontAwesome5 name="sign-out-alt" size={18} color="#FF4B4B" />
             </View>
