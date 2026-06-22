@@ -41,26 +41,7 @@ export default function BottomNav({ state, descriptors, navigation }: BottomTabB
           else if (route.name === 'Progress') iconName = 'chart-bar';
           else if (route.name === 'Profile') iconName = 'user-alt';
 
-          // Inject empty space for middle item
-          if (index === 2) {
-             return (
-               <React.Fragment key={route.key}>
-                 <View style={{ flex: 1 }} />
-                 <TouchableOpacity
-                    onPress={onPress}
-                    style={styles.tabButton}
-                    activeOpacity={0.7}
-                  >
-                    <FontAwesome5 
-                      name={iconName} 
-                      size={28} 
-                      color={isFocused ? '#1CB0F6' : '#AFAFAF'} 
-                      solid={isFocused}
-                    />
-                  </TouchableOpacity>
-               </React.Fragment>
-             );
-          }
+
 
           return (
             <TouchableOpacity
@@ -105,10 +86,9 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: 'absolute',
-    top: -30,
-    left: '50%',
-    marginLeft: -35,
-    zIndex: 10,
+    right: 20,
+    top: -80,
+    zIndex: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },

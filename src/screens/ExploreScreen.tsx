@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, TextInput, Platform, StatusBar } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,7 +25,7 @@ export default function ExploreScreen() {
   const filteredCourses = courses.filter(c => c.category === activeCategory);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Explore</Text>
       </View>
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
     gap: 24,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   searchBarContainer: {
     flexDirection: 'row',
@@ -206,6 +206,7 @@ const styles = StyleSheet.create({
     color: '#4B4B4B',
     textAlign: 'center',
     marginBottom: 12,
+    flexShrink: 1,
   },
   xpBadge: {
     backgroundColor: '#FFC800',

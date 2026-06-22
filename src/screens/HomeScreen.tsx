@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 
 const HomeScreen = () => {
   const [isMoodLogged, setIsMoodLogged] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleMoodSelection = async (moodValue: number) => {
     try {
@@ -25,7 +27,7 @@ const HomeScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
       {/* Header - Stats Bar */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.statPill} activeOpacity={0.8}>
@@ -43,7 +45,6 @@ const HomeScreen = () => {
 
       {/* Course Path Layout */}
       <ScrollView contentContainerStyle={styles.pathContainer} showsVerticalScrollIndicator={false}>
-        
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Unit 1</Text>
           <Text style={styles.sectionSubtitle}>Mindfulness Basics</Text>
@@ -128,7 +129,6 @@ const HomeScreen = () => {
             </View>
           </View>
         )}
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -160,7 +160,8 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   pathContainer: {
-    paddingVertical: 24,
+    paddingTop: 24,
+    paddingBottom: 130,
     paddingHorizontal: 16,
     alignItems: 'center',
   },

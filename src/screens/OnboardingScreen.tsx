@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUserStore } from '../store/useUserStore';
 
 const { width } = Dimensions.get('window');
 
@@ -59,6 +60,8 @@ const TOTAL_STEPS = 6;
 
 export default function OnboardingScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const completeOnboarding = useUserStore((s) => s.completeOnboarding);
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [experience, setExperience] = useState('');
@@ -79,15 +82,11 @@ export default function OnboardingScreen() {
     }
   };
 
-  const goNext = async () => {
+  const goNext = () => {
     if (step < TOTAL_STEPS - 1) {
       setStep(s => s + 1);
     } else {
-      try {
-        await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
-      } catch (e) {
-        console.error(e);
-      }
+      completeOnboarding();
       navigation.replace('MainTabs');
     }
   };
@@ -108,7 +107,7 @@ export default function OnboardingScreen() {
 
   return (
     <View style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, paddingTop: insets.top + 10 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={goPrev} style={styles.backButton}>
             <Text style={styles.backText}>←</Text>
@@ -132,13 +131,15 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={goal.id}
-                      style={[styles.card, isSelected && styles.cardActive]}
+                      style={[styles.cardOuter, isSelected && styles.cardOuterActive]}
                       onPress={() => toggleGoal(goal.id)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.9}
                     >
-                      <Text style={styles.cardEmoji}>{goal.emoji}</Text>
-                      <Text style={[styles.cardLabel, isSelected && styles.cardLabelActive]}>{goal.label}</Text>
-                      {isSelected && <View style={styles.checkIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
+                      <View style={[styles.cardInner, isSelected && styles.cardInnerActive]}>
+                        <Text style={styles.cardEmoji}>{goal.emoji}</Text>
+                        <Text style={[styles.cardLabel, isSelected && styles.cardLabelActive]}>{goal.label}</Text>
+                        {isSelected && <View style={styles.checkIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -159,13 +160,15 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={level.id}
-                      style={[styles.listCard, isSelected && styles.cardActive]}
+                      style={[styles.listCardOuter, isSelected && styles.listCardOuterActive]}
                       onPress={() => setExperience(level.id)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.9}
                     >
-                      <Text style={styles.listCardEmoji}>{level.emoji}</Text>
-                      <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{level.label}</Text>
-                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
+                      <View style={[styles.listCardInner, isSelected && styles.listCardInnerActive]}>
+                        <Text style={styles.listCardEmoji}>{level.emoji}</Text>
+                        <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{level.label}</Text>
+                        {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -186,16 +189,18 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={m.score}
-                      style={[styles.moodItem, isSelected && styles.moodItemActive]}
+                      style={[styles.moodItemOuter, isSelected && styles.moodItemOuterActive]}
                       onPress={() => setMood(m.score)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.9}
                     >
-                      <Text style={[styles.moodEmoji, isSelected && styles.moodEmojiActive]}>
-                        {m.emoji}
-                      </Text>
-                      <Text style={[styles.moodLabel, isSelected && styles.moodLabelActive]}>
-                        {m.label}
-                      </Text>
+                      <View style={[styles.moodItemInner, isSelected && styles.moodItemInnerActive]}>
+                        <Text style={[styles.moodEmoji, isSelected && styles.moodEmojiActive]}>
+                          {m.emoji}
+                        </Text>
+                        <Text style={[styles.moodLabel, isSelected && styles.moodLabelActive]}>
+                          {m.label}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -216,18 +221,20 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={opt.id}
-                      style={[styles.timeCard, isSelected && styles.cardActive]}
+                      style={[styles.timeCardOuter, isSelected && styles.timeCardOuterActive]}
                       onPress={() => setTime(opt.id)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.9}
                     >
-                      {opt.recommended && (
-                        <View style={styles.recommendedBadge}>
-                          <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
-                        </View>
-                      )}
-                      <Text style={styles.timeCardEmoji}>{opt.emoji}</Text>
-                      <Text style={[styles.timeCardLabel, isSelected && styles.cardLabelActive]}>{opt.label}</Text>
-                      <Text style={[styles.timeCardDesc, isSelected && styles.timeCardDescActive]}>{opt.desc}</Text>
+                      <View style={[styles.timeCardInner, isSelected && styles.timeCardInnerActive]}>
+                        {opt.recommended && (
+                          <View style={styles.recommendedBadge}>
+                            <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
+                          </View>
+                        )}
+                        <Text style={styles.timeCardEmoji}>{opt.emoji}</Text>
+                        <Text style={[styles.timeCardLabel, isSelected && styles.cardLabelActive]}>{opt.label}</Text>
+                        <Text style={[styles.timeCardDesc, isSelected && styles.timeCardDescActive]}>{opt.desc}</Text>
+                      </View>
                     </TouchableOpacity>
                   );
                 })}
@@ -248,16 +255,18 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={rt.id}
-                      style={[styles.listCard, isSelected && styles.cardActive]}
+                      style={[styles.listCardOuter, isSelected && styles.listCardOuterActive]}
                       onPress={() => setReminder(rt.id)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.9}
                     >
-                      <Text style={styles.listCardEmoji}>{rt.emoji}</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{rt.label}</Text>
-                        <Text style={[styles.reminderTimeText, isSelected && styles.timeCardDescActive]}>{rt.time}</Text>
+                      <View style={[styles.listCardInner, isSelected && styles.listCardInnerActive]}>
+                        <Text style={styles.listCardEmoji}>{rt.emoji}</Text>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{rt.label}</Text>
+                          <Text style={[styles.reminderTimeText, isSelected && styles.timeCardDescActive]}>{rt.time}</Text>
+                        </View>
+                        {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                       </View>
-                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -326,8 +335,10 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
   
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
-  card: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', position: 'relative', alignItems: 'center' },
-  cardActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02', borderBottomColor: '#58A700' },
+  cardOuter: { width: '48%', backgroundColor: '#CCCCCC', borderRadius: 16, marginTop: 5 },
+  cardOuterActive: { backgroundColor: '#D7A800' },
+  cardInner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', position: 'relative', alignItems: 'center', justifyContent: 'center', transform: [{ translateY: -5 }] },
+  cardInnerActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02' },
   cardEmoji: { fontSize: 32, marginBottom: 12 },
   cardLabel: { fontSize: 15, fontWeight: '800', color: '#4B4B4B', textAlign: 'center' },
   cardLabelActive: { color: '#58CC02' },
@@ -335,26 +346,34 @@ const styles = StyleSheet.create({
   checkIcon: { color: '#FFFFFF', fontSize: 14, fontWeight: '900' },
 
   listContainer: { gap: 12 },
-  listCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5' },
+  listCardOuter: { backgroundColor: '#CCCCCC', borderRadius: 16, marginTop: 5 },
+  listCardOuterActive: { backgroundColor: '#D7A800' },
+  listCardInner: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, borderWidth: 2, borderColor: '#E5E5E5', transform: [{ translateY: -5 }] },
+  listCardInnerActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02' },
   listCardEmoji: { fontSize: 28, marginRight: 16 },
   listCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', flex: 1 },
   listCheckIconContainer: { backgroundColor: '#58CC02', width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   reminderTimeText: { fontSize: 14, color: '#AFAFAF', marginTop: 4, fontWeight: '700' },
 
-  moodContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 24, gap: 8 },
-  moodItem: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', alignItems: 'center' },
-  moodItemActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02', borderBottomColor: '#58A700' },
+  moodContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 24 },
+  moodItemOuter: { width: '47%', backgroundColor: '#CCCCCC', borderRadius: 16, marginTop: 5, marginBottom: 15 },
+  moodItemOuterActive: { backgroundColor: '#D7A800' },
+  moodItemInner: { backgroundColor: '#FFFFFF', borderRadius: 16, paddingVertical: 16, borderWidth: 2, borderColor: '#E5E5E5', alignItems: 'center', transform: [{ translateY: -5 }] },
+  moodItemInnerActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02' },
   moodEmoji: { fontSize: 28, marginBottom: 8 },
   moodEmojiActive: { fontSize: 32 },
   moodLabel: { fontSize: 12, fontWeight: '800', color: '#AFAFAF' },
   moodLabelActive: { color: '#58CC02' },
 
-  timeCard: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, alignItems: 'center', borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', position: 'relative' },
+  timeCardOuter: { width: '48%', backgroundColor: '#CCCCCC', borderRadius: 16, marginTop: 5 },
+  timeCardOuterActive: { backgroundColor: '#D7A800' },
+  timeCardInner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 20, alignItems: 'center', borderWidth: 2, borderColor: '#E5E5E5', position: 'relative', transform: [{ translateY: -5 }] },
+  timeCardInnerActive: { backgroundColor: '#E5F6D3', borderColor: '#58CC02' },
   timeCardEmoji: { fontSize: 32, marginBottom: 12 },
   timeCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', marginBottom: 4 },
   timeCardDesc: { fontSize: 13, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
   timeCardDescActive: { color: '#58CC02' },
-  recommendedBadge: { position: 'absolute', top: -12, backgroundColor: '#FFC800', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, borderWidth: 2, borderColor: '#FFFFFF', zIndex: 10 },
+  recommendedBadge: { position: 'absolute', top: -12, backgroundColor: '#FFC800', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, borderWidth: 2, borderColor: '#FFFFFF', zIndex: 10, borderBottomWidth: 5, borderBottomColor: '#D7A800' },
   recommendedBadgeText: { color: '#FFFFFF', fontSize: 10, fontWeight: '900' },
 
   skipButton: { marginTop: 24, alignItems: 'center', padding: 12 },

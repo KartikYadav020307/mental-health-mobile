@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, SafeAreaView, 
-  TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator
+  TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, StatusBar
 } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -140,7 +140,7 @@ export default function JournalScreen() {
       </TouchableOpacity>
 
       <Modal visible={isModalVisible} animationType="slide" presentationStyle="pageSheet">
-        <SafeAreaView style={styles.modalSafeArea}>
+        <SafeAreaView style={[styles.modalSafeArea, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             
             <View style={styles.modalHeader}>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   headerTitleContainer: { flexDirection: 'row', alignItems: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '900', color: '#4B4B4B' },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  listContainer: { padding: 24, gap: 16, paddingBottom: 100 },
+  listContainer: { padding: 24, gap: 16, paddingBottom: 120 },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
   emptyText: { fontSize: 16, fontWeight: '800', color: '#AFAFAF', textAlign: 'center', marginTop: 16, paddingHorizontal: 20 },
   entryCard: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', padding: 20 },

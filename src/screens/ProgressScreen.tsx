@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, Platform, StatusBar } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '../lib/supabase';
@@ -109,8 +109,8 @@ export default function ProgressScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 120 }]}>
         
         {/* Header */}
         <View style={styles.headerCard}>
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E5E5',
     padding: 24,
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'space-evenly',
     marginTop: 10,
   },
   headerItem: {

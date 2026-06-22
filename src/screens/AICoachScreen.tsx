@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, StatusBar } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -20,6 +21,7 @@ type Message = {
 
 export default function AICoachScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -127,21 +129,19 @@ export default function AICoachScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        {/* Header */}
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
-             <FontAwesome5 name="times" size={24} color="#AFAFAF" />
+            <FontAwesome5 name="times" size={24} color="#AFAFAF" />
           </TouchableOpacity>
           <View style={styles.headerTitleContainer}>
             <FontAwesome5 name="robot" size={24} color="#1CB0F6" style={{ marginRight: 8 }} />
             <Text style={styles.headerTitle}>Serenova AI Coach</Text>
           </View>
-          <View style={{ width: 40 }} /> {/* Spacer to center the title */}
+          <View style={{ width: 40 }} />
         </View>
 
-        {/* Chat Area */}
         <ScrollView contentContainerStyle={styles.chatContent}>
           {messages.map((msg) => (
             <View key={msg.id} style={[styles.bubbleWrapper, msg.isUser ? styles.bubbleWrapperUser : styles.bubbleWrapperAI]}>
@@ -154,7 +154,6 @@ export default function AICoachScreen() {
           ))}
         </ScrollView>
 
-        {/* Input Area */}
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -166,7 +165,7 @@ export default function AICoachScreen() {
             editable={!isLoading}
           />
           <TouchableOpacity 
-            style={[styles.sendButton, isLoading && { opacity: 0.6 }]} 
+            style={[styles.sendButton, isLoading ? { opacity: 0.6 } : undefined]} 
             onPress={handleSend} 
             activeOpacity={0.8}
             disabled={isLoading}
@@ -256,7 +255,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 16,
+    paddingBottom: 20,
     borderTopWidth: 2,
     borderTopColor: '#E5E5E5',
     backgroundColor: '#FFFFFF',

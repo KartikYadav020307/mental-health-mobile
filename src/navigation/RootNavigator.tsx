@@ -9,44 +9,46 @@ import AICoachScreen from '../screens/AICoachScreen';
 import AudioPlayerScreen from '../screens/AudioPlayerScreen';
 import JournalScreen from '../screens/JournalScreen';
 import { RootStackParamList } from './types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUserStore } from '../store/useUserStore';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 ExpoSplashScreen.preventAutoHideAsync();
 
 export default function RootNavigator() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Auth');
+  const [isHydrated, setIsHydrated] = useState(false);
+  const hasCompletedOnboarding = useUserStore((s) => s.hasCompletedOnboarding);
 
   useEffect(() => {
-    const checkState = async () => {
-      try {
-        const hasCompleted = await AsyncStorage.getItem('hasCompletedOnboarding');
-        if (hasCompleted === 'true') {
-          setInitialRoute('MainTabs');
-        } else {
-          setInitialRoute('Auth');
-        }
-      } catch (e) {
-        console.error('Failed to read AsyncStorage', e);
-        setInitialRoute('Auth');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    checkState();
+    // Zustand persist rehydrates asynchronously from AsyncStorage.
+    // We check if the store is already hydrated, and if not, subscribe
+    // to the onFinishHydration event.
+    const unsub = useUserStore.persist.onFinishHydration(() => {
+      setIsHydrated(true);
+    });
+
+    // If the store hydrated before this effect ran (e.g. synchronous storage),
+    // mark it immediately.
+    if (useUserStore.persist.hasHydrated()) {
+      setIsHydrated(true);
+    }
+
+    return unsub;
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (isHydrated) {
       ExpoSplashScreen.hideAsync();
     }
-  }, [isLoading]);
+  }, [isHydrated]);
 
-  if (isLoading) {
+  if (!isHydrated) {
     return <SplashScreen />;
   }
+
+  const initialRoute: keyof RootStackParamList = hasCompletedOnboarding
+    ? 'MainTabs'
+    : 'Auth';
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
@@ -59,3 +61,4 @@ export default function RootNavigator() {
     </Stack.Navigator>
   );
 }
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -16,7 +16,7 @@ export default function SleepScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
       <ScrollView contentContainerStyle={styles.content}>
         
         <View style={styles.header}>
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   content: { 
     padding: 24, 
     gap: 32,
-    paddingBottom: 40
+    paddingBottom: 120
   },
   header: { 
     marginTop: 20,
