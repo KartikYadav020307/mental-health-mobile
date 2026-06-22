@@ -1,14 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
+import { useUserStore } from '../store/useUserStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 
+const XP_PER_LEVEL = 100;
+
 export default function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const insets = useSafeAreaInsets();
+
+  const totalXP = useUserStore((s) => s.totalXP);
+  const currentStreak = useUserStore((s) => s.currentStreak);
+  const totalSessions = useUserStore((s) => s.totalSessions);
+  const minutesMeditated = useUserStore((s) => s.minutesMeditated);
+
+  const level = Math.floor(totalXP / XP_PER_LEVEL) + 1;
+  const xpInCurrentLevel = totalXP % XP_PER_LEVEL;
+  const levelProgress = xpInCurrentLevel / XP_PER_LEVEL;
 
   const handleLogout = async () => {
     try {
@@ -20,6 +34,13 @@ export default function ProfileScreen() {
     }
   };
 
+  const statCards = [
+    { label: 'Day Streak', value: `${currentStreak}`, emoji: '🔥', color: '#FFC800', shadowColor: '#CC9F00' },
+    { label: 'Total XP', value: `${totalXP}`, emoji: '⭐', color: '#58CC02', shadowColor: '#458A00' },
+    { label: 'Sessions', value: `${totalSessions}`, emoji: '🧘', color: '#1CB0F6', shadowColor: '#1489BF' },
+    { label: 'Minutes', value: `${minutesMeditated}`, emoji: '⏱️', color: '#CE82FF', shadowColor: '#9E5FCC' },
+  ];
+
   const menuItems = [
     { id: 'goals', label: 'My Goals', icon: 'bullseye', color: '#58CC02' },
     { id: 'preferences', label: 'Preferences', icon: 'cog', color: '#1CB0F6' },
@@ -27,68 +48,84 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Header Title Bar */}
+    <View style={[styles.safeArea, { paddingTop: insets.top + 10 }]}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* User Header Profile Card */}
-        <View style={styles.userHeaderContainer}>
-          <View style={styles.avatarContainer}>
+        {/* Avatar Section */}
+        <View style={styles.avatarSection}>
+          <View style={styles.avatarOuter}>
             <View style={styles.avatarInner}>
-              <FontAwesome5 name="user-alt" size={42} color="#AFAFAF" solid />
+              <Text style={styles.avatarEmoji}>🧑‍🚀</Text>
             </View>
           </View>
-          <Text style={styles.displayName}>Alex</Text>
-          <View style={styles.freePlanTag}>
-            <Text style={styles.freePlanText}>Free Plan</Text>
+          <Text style={styles.displayName}>Your Stats</Text>
+          <View style={styles.levelBadgeOuter}>
+            <View style={styles.levelBadgeInner}>
+              <Text style={styles.levelBadgeText}>LEVEL {level}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Quick Stats Row */}
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: '#E8F6FE' }]}>
-              <FontAwesome5 name="spa" size={20} color="#1CB0F6" solid />
-            </View>
-            <Text style={styles.statValue}>18</Text>
-            <Text style={styles.statLabel}>Total Sessions</Text>
+        {/* Level Progress Bar */}
+        <View style={styles.levelBarSection}>
+          <View style={styles.levelBarHeader}>
+            <Text style={styles.levelBarLabel}>Level {level}</Text>
+            <Text style={styles.levelBarXP}>{xpInCurrentLevel} / {XP_PER_LEVEL} XP</Text>
           </View>
-
-          <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: '#FFF5D6' }]}>
-              <FontAwesome5 name="fire" size={20} color="#FFC800" solid />
+          <View style={styles.levelBarOuter}>
+            <View style={styles.levelBarTrack}>
+              <View style={[styles.levelBarFill, { width: `${Math.max(levelProgress * 100, 2)}%` }]} />
             </View>
-            <Text style={styles.statValue}>7 Days</Text>
-            <Text style={styles.statLabel}>Longest Streak</Text>
           </View>
+          <Text style={styles.levelBarHint}>
+            {XP_PER_LEVEL - xpInCurrentLevel} XP to Level {level + 1}
+          </Text>
         </View>
 
-        {/* Settings List Vertical Stack */}
+        {/* Stats Grid 2x2 */}
+        <View style={styles.statsGrid}>
+          {statCards.map((stat) => (
+            <View key={stat.label} style={[styles.statCardOuter, { backgroundColor: stat.shadowColor }]}>
+              <View style={[styles.statCardInner, { backgroundColor: stat.color }]}>
+                <Text style={styles.statEmoji}>{stat.emoji}</Text>
+                <Text style={styles.statValue}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Settings Menu */}
         <View style={styles.settingsContainer}>
           {menuItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.menuButton} activeOpacity={0.8}>
-              <View style={[styles.menuIconContainer, { backgroundColor: `${item.color}20` }]}>
-                <FontAwesome5 name={item.icon} size={18} color={item.color} solid />
+            <TouchableOpacity key={item.id} style={styles.menuOuter} activeOpacity={0.8}>
+              <View style={styles.menuInner}>
+                <View style={[styles.menuIconContainer, { backgroundColor: `${item.color}20` }]}>
+                  <FontAwesome5 name={item.icon} size={18} color={item.color} solid />
+                </View>
+                <Text style={styles.menuButtonText}>{item.label}</Text>
+                <FontAwesome5 name="chevron-right" size={14} color="#AFAFAF" />
               </View>
-              <Text style={styles.menuButtonText}>{item.label}</Text>
-              <FontAwesome5 name="chevron-right" size={14} color="#AFAFAF" />
             </TouchableOpacity>
           ))}
 
-          {/* Log Out Button - Soft Red Theme */}
-          <TouchableOpacity style={[styles.menuButton, styles.logOutButton]} activeOpacity={0.8} onPress={handleLogout}>
-            <View style={styles.logOutIconContainer}>
-              <FontAwesome5 name="sign-out-alt" size={18} color="#FF4B4B" />
+          {/* Log Out */}
+          <TouchableOpacity style={styles.logOutOuter} activeOpacity={0.8} onPress={handleLogout}>
+            <View style={styles.logOutInner}>
+              <View style={styles.logOutIconContainer}>
+                <FontAwesome5 name="sign-out-alt" size={18} color="#FF4B4B" />
+              </View>
+              <Text style={[styles.menuButtonText, styles.logOutText]}>Log Out</Text>
+              <FontAwesome5 name="chevron-right" size={14} color="#FF9F9F" />
             </View>
-            <Text style={[styles.menuButtonText, styles.logOutText]}>Log Out</Text>
-            <FontAwesome5 name="chevron-right" size={14} color="#FF9F9F" />
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -111,106 +148,160 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 24,
-    paddingBottom: 40,
+    paddingBottom: 130,
   },
-  userHeaderContainer: {
+
+  // ── Avatar ──────────────────────────────────────────────────────────
+  avatarSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
   },
-  avatarContainer: {
-    width: 106,
-    height: 106,
-    borderRadius: 53,
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    borderBottomWidth: 5,
-    borderBottomColor: '#D1D1D1',
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
+  avatarOuter: {
+    width: 110,
+    height: 115,
+    borderRadius: 55,
+    backgroundColor: '#458A00',
     alignItems: 'center',
     marginBottom: 16,
   },
   avatarInner: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#F5F5F5',
-    justifyContent: 'center',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: '#58CC02',
+    borderWidth: 3,
+    borderColor: '#78DC28',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 52,
   },
   displayName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '900',
     color: '#4B4B4B',
-    marginBottom: 8,
+    marginBottom: 10,
   },
-  freePlanTag: {
-    backgroundColor: '#1CB0F6',
-    borderColor: '#1CB0F6',
-    borderBottomColor: '#1899D6',
+  levelBadgeOuter: {
+    backgroundColor: '#CC9F00',
+    borderRadius: 14,
+    paddingBottom: 4,
+  },
+  levelBadgeInner: {
+    backgroundColor: '#FFC800',
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderWidth: 2,
-    borderBottomWidth: 3,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    borderColor: '#FFD84D',
   },
-  freePlanText: {
+  levelBadgeText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '900',
-    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
-  statsRow: {
+
+  // ── Level Progress Bar ──────────────────────────────────────────────
+  levelBarSection: {
+    marginBottom: 28,
+  },
+  levelBarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 32,
-  },
-  statCard: {
-    width: '48%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    borderBottomWidth: 5,
-    borderBottomColor: '#D1D1D1',
-    padding: 16,
     alignItems: 'center',
+    marginBottom: 8,
   },
-  statIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statValue: {
-    fontSize: 20,
+  levelBarLabel: {
+    fontSize: 16,
     fontWeight: '900',
     color: '#4B4B4B',
-    marginBottom: 4,
   },
-  statLabel: {
+  levelBarXP: {
     fontSize: 14,
     fontWeight: '800',
     color: '#AFAFAF',
-    textAlign: 'center',
   },
+  levelBarOuter: {
+    backgroundColor: '#458A00',
+    borderRadius: 10,
+    paddingBottom: 4,
+  },
+  levelBarTrack: {
+    height: 20,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  levelBarFill: {
+    height: '100%',
+    backgroundColor: '#58CC02',
+    borderRadius: 10,
+  },
+  levelBarHint: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#AFAFAF',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+
+  // ── Stats Grid ──────────────────────────────────────────────────────
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 28,
+  },
+  statCardOuter: {
+    width: '47%',
+    borderRadius: 16,
+    paddingBottom: 5,
+    marginBottom: 14,
+  },
+  statCardInner: {
+    borderRadius: 16,
+    padding: 18,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  statEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  statLabel: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.85)',
+  },
+
+  // ── Settings Menu ───────────────────────────────────────────────────
   settingsContainer: {
     width: '100%',
   },
-  menuButton: {
+  menuOuter: {
+    backgroundColor: '#D1D1D1',
+    borderRadius: 16,
+    paddingBottom: 4,
+    marginBottom: 12,
+  },
+  menuInner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
-    borderBottomWidth: 5,
-    borderBottomColor: '#D1D1D1',
     paddingVertical: 16,
     paddingHorizontal: 20,
-    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#E5E5E5',
   },
   menuIconContainer: {
     width: 36,
@@ -226,10 +317,21 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#4B4B4B',
   },
-  logOutButton: {
+  logOutOuter: {
+    backgroundColor: '#CC3333',
+    borderRadius: 16,
+    paddingBottom: 4,
+    marginBottom: 12,
+  },
+  logOutInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFECEC',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderWidth: 2,
     borderColor: '#FFC5C5',
-    borderBottomColor: '#FF9F9F',
   },
   logOutIconContainer: {
     width: 36,

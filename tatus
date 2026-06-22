@@ -1,0 +1,16 @@
+.gitignore
+AGENTS.md
+app.json
+package-lock.json
+package.json
+src/components/BottomNav.tsx
+src/navigation/RootNavigator.tsx
+src/screens/AICoachScreen.tsx
+src/screens/AudioPlayerScreen.tsx
+src/screens/ExploreScreen.tsx
+src/screens/HomeScreen.tsx
+src/screens/JournalScreen.tsx
+src/screens/OnboardingScreen.tsx
+src/screens/ProgressScreen.tsx
+src/screens/SleepScreen.tsx
+src/store/useUserStore.ts

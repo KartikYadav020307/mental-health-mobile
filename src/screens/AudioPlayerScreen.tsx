@@ -8,9 +8,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { useRoute, useNavigation, RouteProp, CommonActions } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
 import { Audio, AVPlaybackStatus } from 'expo-av';
+import { useUserStore } from '../store/useUserStore';
 
 // Royalty-free placeholder audio (a relaxing piano loop hosted on archive.org)
 const PLACEHOLDER_AUDIO_URL =
@@ -32,6 +33,11 @@ export default function AudioPlayerScreen() {
   const { title } = route.params;
 
   const soundRef = useRef<Audio.Sound | null>(null);
+  const hasRewardedRef = useRef(false);
+
+  const addXP = useUserStore((s) => s.addXP);
+  const logSession = useUserStore((s) => s.logSession);
+  const incrementStreak = useUserStore((s) => s.incrementStreak);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -47,11 +53,34 @@ export default function AudioPlayerScreen() {
     setDurationMs(status.durationMillis ?? 0);
     setIsPlaying(status.isPlaying);
 
-    if (status.didJustFinish) {
+    if (status.didJustFinish && !hasRewardedRef.current) {
+      hasRewardedRef.current = true;
       setDidFinish(true);
       setIsPlaying(false);
+
+      // ── Gamification rewards ──
+      const durationMinutes = Math.max(1, Math.round((status.durationMillis ?? 0) / 60000));
+      addXP(10);
+      logSession(durationMinutes);
+      incrementStreak();
+
+      // Navigate to Profile tab so the user sees their rewards
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'MainTabs',
+              state: {
+                routes: [{ name: 'Profile' }],
+                index: 0,
+              },
+            },
+          ],
+        })
+      );
     }
-  }, []);
+  }, [addXP, logSession, incrementStreak, navigation]);
 
   // ── Load audio on mount, unload on unmount ──────────────────────────
   useEffect(() => {
