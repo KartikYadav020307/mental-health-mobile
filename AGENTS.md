@@ -20,3 +20,7 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
    - **Check Comment Syntax:** Ensure all JSX comments use `{/* comment */}`. Using standard `//` comments inside JSX will render as a raw text string and crash the app.
    - **Check Conditional Renders:** Ensure conditional statements do not accidentally evaluate to strings or numbers (e.g., `value && <View />` where `value` is a string or `0`). 
    - **The Bulletproof Fix:** If visual inspection fails to locate the rogue character or phantom whitespace, the fastest and most reliable fix is to cleanly rewrite the affected JSX return block to strip out all invisible formatting characters.
+
+6. **Gamified 3D Buttons (Explicit 4-Sided Borders)**: When implementing a 3D "pop" or shadow effect for buttons/cards (e.g., Duolingo-style UI) in React Native, **DO NOT** use the nested "Shadow Wrapper" method with `translateY` or `paddingBottom` hacks, as this causes UI bleed and disjointed shadows on Android. Instead, use a SINGLE `<TouchableOpacity>` component and explicitly define all 4 borders to prevent Android's global border collapse. 
+   - You MUST define exact widths: `borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6`.
+   - You MUST define exact colors for all 4 sides, using the base color for top/sides and a darker shade for the bottom shadow (e.g., `borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC'`).

@@ -131,15 +131,13 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={goal.id}
-                      style={[styles.cardOuter, isSelected && styles.cardOuterActive]}
+                      style={[styles.card, isSelected && styles.cardActive]}
                       onPress={() => toggleGoal(goal.id)}
                       activeOpacity={0.9}
                     >
-                      <View style={[styles.cardInner, isSelected && styles.cardInnerActive]}>
-                        <Text style={styles.cardEmoji}>{goal.emoji}</Text>
-                        <Text style={[styles.cardLabel, isSelected && styles.cardLabelActive]}>{goal.label}</Text>
-                        {isSelected && <View style={styles.checkIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
-                      </View>
+                      <Text style={styles.cardEmoji}>{goal.emoji}</Text>
+                      <Text style={[styles.cardLabel, isSelected && styles.cardLabelActive]}>{goal.label}</Text>
+                      {isSelected && <View style={styles.checkIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -160,15 +158,13 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={level.id}
-                      style={[styles.listCardOuter, isSelected && styles.listCardOuterActive]}
+                      style={[styles.listCard, isSelected && styles.listCardActive]}
                       onPress={() => setExperience(level.id)}
                       activeOpacity={0.9}
                     >
-                      <View style={[styles.listCardInner, isSelected && styles.listCardInnerActive]}>
-                        <Text style={styles.listCardEmoji}>{level.emoji}</Text>
-                        <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{level.label}</Text>
-                        {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
-                      </View>
+                      <Text style={styles.listCardEmoji}>{level.emoji}</Text>
+                      <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{level.label}</Text>
+                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -189,18 +185,16 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={m.score}
-                      style={[styles.moodItemOuter, isSelected && styles.moodItemOuterActive]}
+                      style={[styles.moodItem, isSelected && styles.moodItemActive]}
                       onPress={() => setMood(m.score)}
                       activeOpacity={0.9}
                     >
-                      <View style={[styles.moodItemInner, isSelected && styles.moodItemInnerActive]}>
-                        <Text style={[styles.moodEmoji, isSelected && styles.moodEmojiActive]}>
-                          {m.emoji}
-                        </Text>
-                        <Text style={[styles.moodLabel, isSelected && styles.moodLabelActive]}>
-                          {m.label}
-                        </Text>
-                      </View>
+                      <Text style={[styles.moodEmoji, isSelected && styles.moodEmojiActive]}>
+                        {m.emoji}
+                      </Text>
+                      <Text style={[styles.moodLabel, isSelected && styles.moodLabelActive]}>
+                        {m.label}
+                      </Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -221,20 +215,18 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={opt.id}
-                      style={[styles.timeCardOuter, isSelected && styles.timeCardOuterActive]}
+                      style={[styles.timeCard, isSelected && styles.timeCardActive]}
                       onPress={() => setTime(opt.id)}
                       activeOpacity={0.9}
                     >
-                      <View style={[styles.timeCardInner, isSelected && styles.timeCardInnerActive]}>
-                        {opt.recommended && (
-                          <View style={styles.recommendedBadge}>
-                            <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
-                          </View>
-                        )}
-                        <Text style={styles.timeCardEmoji}>{opt.emoji}</Text>
-                        <Text style={[styles.timeCardLabel, isSelected && styles.cardLabelActive]}>{opt.label}</Text>
-                        <Text style={[styles.timeCardDesc, isSelected && styles.timeCardDescActive]}>{opt.desc}</Text>
-                      </View>
+                      {opt.recommended && (
+                        <View style={styles.recommendedBadge}>
+                          <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
+                        </View>
+                      )}
+                      <Text style={styles.timeCardEmoji}>{opt.emoji}</Text>
+                      <Text style={[styles.timeCardLabel, isSelected && styles.cardLabelActive]}>{opt.label}</Text>
+                      <Text style={[styles.timeCardDesc, isSelected && styles.timeCardDescActive]}>{opt.desc}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -255,18 +247,14 @@ export default function OnboardingScreen() {
                   return (
                     <TouchableOpacity
                       key={rt.id}
-                      style={[styles.listCardOuter, isSelected && styles.listCardOuterActive]}
+                      style={[styles.listCard, isSelected && styles.listCardActive]}
                       onPress={() => setReminder(rt.id)}
                       activeOpacity={0.9}
                     >
-                      <View style={[styles.listCardInner, isSelected && styles.listCardInnerActive]}>
-                        <Text style={styles.listCardEmoji}>{rt.emoji}</Text>
-                        <View style={{ flex: 1 }}>
-                          <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{rt.label}</Text>
-                          <Text style={[styles.reminderTimeText, isSelected && styles.timeCardDescActive]}>{rt.time}</Text>
-                        </View>
-                        {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
-                      </View>
+                      <Text style={styles.listCardEmoji}>{rt.emoji}</Text>
+                      <Text style={[styles.listCardLabel, isSelected && styles.cardLabelActive]}>{rt.label}</Text>
+                      <Text style={[styles.reminderTimeText, isSelected && styles.timeCardDescActive]}>{rt.time}</Text>
+                      {isSelected && <View style={styles.listCheckIconContainer}><Text style={styles.checkIcon}>✓</Text></View>}
                     </TouchableOpacity>
                   );
                 })}
@@ -335,10 +323,8 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 16, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
   
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', width: '100%' },
-  cardOuter: { width: '48%', backgroundColor: '#CCCCCC', borderRadius: 16, paddingBottom: 6, marginBottom: 15 },
-  cardOuterActive: { backgroundColor: '#D7A800' },
-  cardInner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, alignItems: 'center', justifyContent: 'center', flex: 1, flexDirection: 'column' },
-  cardInnerActive: { backgroundColor: '#E5F6D3' },
+  card: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, marginBottom: 15, padding: 16, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC' },
+  cardActive: { backgroundColor: '#E5F6D3', borderTopColor: '#58CC02', borderLeftColor: '#58CC02', borderRightColor: '#58CC02', borderBottomColor: '#4BA100' },
   cardEmoji: { fontSize: 32, marginBottom: 12 },
   cardLabel: { fontSize: 15, fontWeight: '800', color: '#4B4B4B', textAlign: 'center' },
   cardLabelActive: { color: '#58CC02' },
@@ -346,29 +332,23 @@ const styles = StyleSheet.create({
   checkIcon: { color: '#FFFFFF', fontSize: 14, fontWeight: '900' },
 
   listContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', width: '100%' },
-  listCardOuter: { width: '48%', backgroundColor: '#CCCCCC', borderRadius: 16, paddingBottom: 6, marginBottom: 15 },
-  listCardOuterActive: { backgroundColor: '#D7A800' },
-  listCardInner: { flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, flex: 1 },
-  listCardInnerActive: { backgroundColor: '#E5F6D3' },
+  listCard: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, marginBottom: 15, padding: 16, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC' },
+  listCardActive: { backgroundColor: '#E5F6D3', borderTopColor: '#58CC02', borderLeftColor: '#58CC02', borderRightColor: '#58CC02', borderBottomColor: '#4BA100' },
   listCardEmoji: { fontSize: 28, marginBottom: 8 },
   listCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', textAlign: 'center' },
   listCheckIconContainer: { position: 'absolute', top: 8, right: 8, backgroundColor: '#58CC02', width: 24, height: 24, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   reminderTimeText: { fontSize: 14, color: '#AFAFAF', marginTop: 4, fontWeight: '700', textAlign: 'center' },
 
   moodContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginTop: 24, width: '100%' },
-  moodItemOuter: { width: '47%', backgroundColor: '#CCCCCC', borderRadius: 16, paddingBottom: 6, marginBottom: 15 },
-  moodItemOuterActive: { backgroundColor: '#D7A800' },
-  moodItemInner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, alignItems: 'center', justifyContent: 'center', flex: 1, flexDirection: 'column' },
-  moodItemInnerActive: { backgroundColor: '#E5F6D3' },
+  moodItem: { width: '47%', backgroundColor: '#FFFFFF', borderRadius: 16, marginBottom: 15, padding: 16, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC' },
+  moodItemActive: { backgroundColor: '#E5F6D3', borderTopColor: '#58CC02', borderLeftColor: '#58CC02', borderRightColor: '#58CC02', borderBottomColor: '#4BA100' },
   moodEmoji: { fontSize: 28, marginBottom: 8 },
   moodEmojiActive: { fontSize: 32 },
   moodLabel: { fontSize: 12, fontWeight: '800', color: '#AFAFAF', textAlign: 'center' },
   moodLabelActive: { color: '#58CC02' },
 
-  timeCardOuter: { width: '48%', backgroundColor: '#CCCCCC', borderRadius: 16, paddingBottom: 6, marginBottom: 15 },
-  timeCardOuterActive: { backgroundColor: '#D7A800' },
-  timeCardInner: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, alignItems: 'center', justifyContent: 'center', flex: 1, flexDirection: 'column' },
-  timeCardInnerActive: { backgroundColor: '#E5F6D3' },
+  timeCard: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 16, marginBottom: 15, padding: 16, alignItems: 'center', justifyContent: 'center', flexDirection: 'column', borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC' },
+  timeCardActive: { backgroundColor: '#E5F6D3', borderTopColor: '#58CC02', borderLeftColor: '#58CC02', borderRightColor: '#58CC02', borderBottomColor: '#4BA100' },
   timeCardEmoji: { fontSize: 32, marginBottom: 12 },
   timeCardLabel: { fontSize: 16, fontWeight: '800', color: '#4B4B4B', marginBottom: 4, textAlign: 'center' },
   timeCardDesc: { fontSize: 13, color: '#AFAFAF', textAlign: 'center', fontWeight: '600' },
