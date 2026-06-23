@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,17 +10,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useRoute, useNavigation, RouteProp, CommonActions } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/types';
-import { Audio, AVPlaybackStatus } from 'expo-av';
 import { useUserStore } from '../store/useUserStore';
+import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 
 // Royalty-free placeholder audio (a relaxing piano loop hosted on archive.org)
 const PLACEHOLDER_AUDIO_URL =
   'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg';
 
-/** Format milliseconds to mm:ss */
-function formatTime(ms: number): string {
-  if (!ms || ms < 0) return '00:00';
-  const totalSeconds = Math.floor(ms / 1000);
+/** Format seconds to mm:ss */
+function formatTime(s: number): string {
+  if (!s || s < 0) return '00:00';
+  const totalSeconds = Math.floor(s);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
@@ -32,34 +32,32 @@ export default function AudioPlayerScreen() {
   const insets = useSafeAreaInsets();
   const { title } = route.params;
 
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const hasRewardedRef = useRef(false);
+  const player = useAudioPlayer(PLACEHOLDER_AUDIO_URL);
+  const status = useAudioPlayerStatus(player);
 
   const addXP = useUserStore((s) => s.addXP);
   const logSession = useUserStore((s) => s.logSession);
   const incrementStreak = useUserStore((s) => s.incrementStreak);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [positionMs, setPositionMs] = useState(0);
-  const [durationMs, setDurationMs] = useState(0);
   const [didFinish, setDidFinish] = useState(false);
+  const hasRewardedRef = useRef(false);
 
-  // ── Playback status callback ────────────────────────────────────────
-  const onPlaybackStatusUpdate = useCallback((status: AVPlaybackStatus) => {
-    if (!status.isLoaded) return;
+  // ── Configure background audio ─────────────────────────────────────────
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: 'mixWithOthers',
+    });
+  }, []);
 
-    setPositionMs(status.positionMillis);
-    setDurationMs(status.durationMillis ?? 0);
-    setIsPlaying(status.isPlaying);
-
+  // ── Gamification rewards on completion ──────────────────────────────
+  useEffect(() => {
     if (status.didJustFinish && !hasRewardedRef.current) {
       hasRewardedRef.current = true;
       setDidFinish(true);
-      setIsPlaying(false);
 
-      // ── Gamification rewards ──
-      const durationMinutes = Math.max(1, Math.round((status.durationMillis ?? 0) / 60000));
+      const durationMinutes = Math.max(1, Math.round(status.duration / 60));
       addXP(10);
       logSession(durationMinutes);
       incrementStreak();
@@ -80,103 +78,54 @@ export default function AudioPlayerScreen() {
         })
       );
     }
-  }, [addXP, logSession, incrementStreak, navigation]);
-
-  // ── Load audio on mount, unload on unmount ──────────────────────────
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-        });
-
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: PLACEHOLDER_AUDIO_URL },
-          { shouldPlay: false, progressUpdateIntervalMillis: 250 },
-          onPlaybackStatusUpdate
-        );
-
-        if (isMounted) {
-          soundRef.current = sound;
-          setIsLoading(false);
-        } else {
-          // Component unmounted before load finished
-          await sound.unloadAsync();
-        }
-      } catch (error) {
-        console.error('Failed to load audio:', error);
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    loadAudio();
-
-    return () => {
-      isMounted = false;
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-    };
-  }, [onPlaybackStatusUpdate]);
+  }, [status.didJustFinish, status.duration, addXP, logSession, incrementStreak, navigation]);
 
   // ── Controls ────────────────────────────────────────────────────────
-  const togglePlayPause = async () => {
-    if (!soundRef.current) return;
-
+  const togglePlayPause = () => {
     if (didFinish) {
-      // If track finished, replay from start
-      await soundRef.current.setPositionAsync(0);
+      player.seekTo(0);
       setDidFinish(false);
     }
 
-    if (isPlaying) {
-      await soundRef.current.pauseAsync();
+    if (status.playing) {
+      player.pause();
     } else {
-      await soundRef.current.playAsync();
+      player.play();
     }
   };
 
-  const handleStop = async () => {
-    if (soundRef.current) {
-      await soundRef.current.stopAsync();
-      await soundRef.current.setPositionAsync(0);
-      setDidFinish(false);
-    }
-  };
-
-  const handleSeek = async (fraction: number) => {
-    if (!soundRef.current || durationMs === 0) return;
-    const newPosition = Math.floor(fraction * durationMs);
-    await soundRef.current.setPositionAsync(newPosition);
+  const handleStop = () => {
+    player.pause();
+    player.seekTo(0);
     setDidFinish(false);
   };
 
-  const handleClose = async () => {
-    if (soundRef.current) {
-      await soundRef.current.stopAsync();
-    }
+  const handleSeek = (fraction: number) => {
+    if (status.duration === 0) return;
+    const newPosition = fraction * status.duration;
+    player.seekTo(newPosition);
+    setDidFinish(false);
+  };
+
+  const handleClose = () => {
+    player.pause();
     navigation.goBack();
   };
 
   // ── Skip forward / backward 15s ────────────────────────────────────
-  const skipForward = async () => {
-    if (!soundRef.current) return;
-    const newPos = Math.min(positionMs + 15000, durationMs);
-    await soundRef.current.setPositionAsync(newPos);
+  const skipForward = () => {
+    const newPos = Math.min(status.currentTime + 15, status.duration);
+    player.seekTo(newPos);
   };
 
-  const skipBackward = async () => {
-    if (!soundRef.current) return;
-    const newPos = Math.max(positionMs - 15000, 0);
-    await soundRef.current.setPositionAsync(newPos);
+  const skipBackward = () => {
+    const newPos = Math.max(status.currentTime - 15, 0);
+    player.seekTo(newPos);
   };
 
   // ── Progress fraction ───────────────────────────────────────────────
-  const progress = durationMs > 0 ? positionMs / durationMs : 0;
+  const progress = status.duration > 0 ? status.currentTime / status.duration : 0;
+  const isLoading = !status.isLoaded;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
@@ -198,7 +147,7 @@ export default function AudioPlayerScreen() {
               <ActivityIndicator size="large" color="#FFFFFF" />
             ) : (
               <FontAwesome5
-                name={isPlaying ? 'music' : 'headphones'}
+                name={status.playing ? 'music' : 'headphones'}
                 size={72}
                 color="#FFFFFF"
                 solid
@@ -218,9 +167,9 @@ export default function AudioPlayerScreen() {
             activeOpacity={1}
             onPress={(e) => {
               const { locationX } = e.nativeEvent;
-              // Track is full width minus padding (48*2)
-              const trackWidth = e.nativeEvent.target ? 0 : 0; // fallback
-              handleSeek(Math.max(0, Math.min(1, locationX / (e.currentTarget as any)._nativeTag)));
+              // Provide a fallback width if native element target isn't readily available
+              const targetWidth = (e.currentTarget as any)._nativeTag ? 300 : 300; 
+              handleSeek(Math.max(0, Math.min(1, locationX / targetWidth)));
             }}
           >
             <View style={styles.progressTrackBg}>
@@ -234,8 +183,8 @@ export default function AudioPlayerScreen() {
             </View>
           </TouchableOpacity>
           <View style={styles.timeRow}>
-            <Text style={styles.timeText}>{formatTime(positionMs)}</Text>
-            <Text style={styles.timeText}>{formatTime(durationMs)}</Text>
+            <Text style={styles.timeText}>{formatTime(status.currentTime)}</Text>
+            <Text style={styles.timeText}>{formatTime(status.duration)}</Text>
           </View>
         </View>
 
@@ -274,11 +223,11 @@ export default function AudioPlayerScreen() {
                   <ActivityIndicator size="large" color="#FFFFFF" />
                 ) : (
                   <FontAwesome5
-                    name={isPlaying ? 'pause' : 'play'}
+                    name={status.playing ? 'pause' : 'play'}
                     size={32}
                     color="#FFFFFF"
                     solid
-                    style={!isPlaying ? { marginLeft: 6 } : {}}
+                    style={!status.playing ? { marginLeft: 6 } : {}}
                   />
                 )}
               </View>
