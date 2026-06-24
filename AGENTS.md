@@ -1,3 +1,9 @@
+# Agent Workflow & Skill Proactivity
+
+1. **Proactive Skill & MCP Usage**: Do not wait for the user to explicitly prompt you to use specific skills or MCP servers. You are expected to be intelligent enough to proactively recognize when a task requires specialized domain knowledge. If a task touches React Native layout, Expo modules, EAS deployment, UI construction, or audio/data fetching, you MUST proactively read the relevant skill instructions from the `skills/` directories (e.g., `building-native-ui`, `expo-ui`, `native-data-fetching`) and execute the required MCP tools before taking action or making assumptions. 
+   - **Expo MCP Priority**: Make as much use of the Expo MCP server as possible for all Expo-related troubleshooting and tasks.
+   - **MCP Configuration**: Use `C:\Users\yamle\.gemini\config\mcp_config.json` as the source of truth for accessing and discovering configured MCP servers.
+
 # Expo HAS CHANGED
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.

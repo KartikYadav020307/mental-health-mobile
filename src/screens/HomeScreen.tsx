@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 import { supabase } from '../lib/supabase';
 
 const HomeScreen = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isMoodLogged, setIsMoodLogged] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -52,19 +56,31 @@ const HomeScreen = () => {
         
         {/* Path Nodes */}
         <View style={styles.nodeWrapperLeft}>
-          <TouchableOpacity style={[styles.node, styles.nodeCompleted]} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={[styles.node, styles.nodeCompleted]} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('AudioPlayer', { title: 'Mindfulness Basics' })}
+          >
             <FontAwesome5 name="check" size={32} color="#fff" solid />
           </TouchableOpacity>
         </View>
 
         <View style={styles.nodeWrapperCenter}>
-          <TouchableOpacity style={[styles.node, styles.nodeCompleted]} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={[styles.node, styles.nodeCompleted]} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('AudioPlayer', { title: 'Breathing Exercises' })}
+          >
             <FontAwesome5 name="check" size={32} color="#fff" solid />
           </TouchableOpacity>
         </View>
 
         <View style={styles.nodeWrapperRight}>
-          <TouchableOpacity style={[styles.node, styles.nodeActive]} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={[styles.node, styles.nodeActive]} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('AudioPlayer', { title: 'Focus & Flow' })}
+          >
             <FontAwesome5 name="brain" size={40} color="#fff" solid />
           </TouchableOpacity>
           {/* Tooltip for Active Node */}

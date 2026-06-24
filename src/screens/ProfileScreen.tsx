@@ -89,12 +89,22 @@ export default function ProfileScreen() {
         {/* Stats Grid 2x2 */}
         <View style={styles.statsGrid}>
           {statCards.map((stat) => (
-            <View key={stat.label} style={[styles.statCardOuter, { backgroundColor: stat.shadowColor }]}>
-              <View style={[styles.statCardInner, { backgroundColor: stat.color }]}>
-                <Text style={styles.statEmoji}>{stat.emoji}</Text>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
+            <View 
+              key={stat.label} 
+              style={[
+                styles.statCard, 
+                { 
+                  backgroundColor: stat.color,
+                  borderTopColor: stat.color,
+                  borderLeftColor: stat.color,
+                  borderRightColor: stat.color,
+                  borderBottomColor: stat.shadowColor 
+                }
+              ]}
+            >
+              <Text style={styles.statEmoji}>{stat.emoji}</Text>
+              <Text style={styles.statValue}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
             </View>
           ))}
         </View>
@@ -102,26 +112,30 @@ export default function ProfileScreen() {
         {/* Settings Menu */}
         <View style={styles.settingsContainer}>
           {menuItems.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.menuOuter} activeOpacity={0.8}>
-              <View style={styles.menuInner}>
-                <View style={[styles.menuIconContainer, { backgroundColor: `${item.color}20` }]}>
-                  <FontAwesome5 name={item.icon} size={18} color={item.color} solid />
-                </View>
-                <Text style={styles.menuButtonText}>{item.label}</Text>
-                <FontAwesome5 name="chevron-right" size={14} color="#AFAFAF" />
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.menuItem} 
+              activeOpacity={0.8}
+            >
+              <View style={[styles.menuIconContainer, { backgroundColor: `${item.color}20` }]}>
+                <FontAwesome5 name={item.icon} size={18} color={item.color} solid />
               </View>
+              <Text style={styles.menuButtonText}>{item.label}</Text>
+              <FontAwesome5 name="chevron-right" size={14} color="#AFAFAF" />
             </TouchableOpacity>
           ))}
 
           {/* Log Out */}
-          <TouchableOpacity style={styles.logOutOuter} activeOpacity={0.8} onPress={handleLogout}>
-            <View style={styles.logOutInner}>
-              <View style={styles.logOutIconContainer}>
-                <FontAwesome5 name="sign-out-alt" size={18} color="#FF4B4B" />
-              </View>
-              <Text style={[styles.menuButtonText, styles.logOutText]}>Log Out</Text>
-              <FontAwesome5 name="chevron-right" size={14} color="#FF9F9F" />
+          <TouchableOpacity 
+            style={[styles.menuItem, styles.logOutItem]} 
+            activeOpacity={0.8} 
+            onPress={handleLogout}
+          >
+            <View style={styles.logOutIconContainer}>
+              <FontAwesome5 name="sign-out-alt" size={18} color="#FF4B4B" />
             </View>
+            <Text style={[styles.menuButtonText, styles.logOutText]}>Log Out</Text>
+            <FontAwesome5 name="chevron-right" size={14} color="#FF9F9F" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -254,18 +268,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 28,
   },
-  statCardOuter: {
+  statCard: {
     width: '47%',
     borderRadius: 16,
-    paddingBottom: 5,
     marginBottom: 14,
-  },
-  statCardInner: {
-    borderRadius: 16,
     padding: 18,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 6,
   },
   statEmoji: {
     fontSize: 32,
@@ -287,21 +299,22 @@ const styles = StyleSheet.create({
   settingsContainer: {
     width: '100%',
   },
-  menuOuter: {
-    backgroundColor: '#D1D1D1',
-    borderRadius: 16,
-    paddingBottom: 4,
-    marginBottom: 12,
-  },
-  menuInner: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
+    marginBottom: 12,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderWidth: 2,
-    borderColor: '#E5E5E5',
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
+    borderRightWidth: 2,
+    borderBottomWidth: 6,
+    borderTopColor: '#E5E5E5',
+    borderLeftColor: '#E5E5E5',
+    borderRightColor: '#E5E5E5',
+    borderBottomColor: '#D1D1D1',
   },
   menuIconContainer: {
     width: 36,
@@ -317,21 +330,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#4B4B4B',
   },
-  logOutOuter: {
-    backgroundColor: '#CC3333',
-    borderRadius: 16,
-    paddingBottom: 4,
-    marginBottom: 12,
-  },
-  logOutInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  logOutItem: {
     backgroundColor: '#FFECEC',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderWidth: 2,
-    borderColor: '#FFC5C5',
+    borderTopColor: '#FFC5C5',
+    borderLeftColor: '#FFC5C5',
+    borderRightColor: '#FFC5C5',
+    borderBottomColor: '#CC3333',
   },
   logOutIconContainer: {
     width: 36,

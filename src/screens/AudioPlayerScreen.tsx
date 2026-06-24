@@ -15,7 +15,7 @@ import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-au
 
 // Royalty-free placeholder audio (a relaxing piano loop hosted on archive.org)
 const PLACEHOLDER_AUDIO_URL =
-  'https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg';
+  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
 /** Format seconds to mm:ss */
 function formatTime(s: number): string {
@@ -51,9 +51,21 @@ export default function AudioPlayerScreen() {
     });
   }, []);
 
+  // ── Error Boundary for Audio ─────────────────────────────────────────
+  // Since we use the modern expo-audio useAudioPlayer hook instead of 
+  // the legacy expo-av Audio.Sound.createAsync, we monitor the status object for errors.
+  useEffect(() => {
+    if ((status as any).error) {
+      console.error('Failed to load audio:', (status as any).error);
+    }
+  }, [(status as any).error]);
+
   // ── Gamification rewards on completion ──────────────────────────────
   useEffect(() => {
-    if (status.didJustFinish && !hasRewardedRef.current) {
+    // expo-audio uses currentTime and duration
+    const isFinished = status.duration > 0 && status.currentTime >= status.duration;
+
+    if (isFinished && !hasRewardedRef.current) {
       hasRewardedRef.current = true;
       setDidFinish(true);
 
@@ -63,22 +75,9 @@ export default function AudioPlayerScreen() {
       incrementStreak();
 
       // Navigate to Profile tab so the user sees their rewards
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: 'MainTabs',
-              state: {
-                routes: [{ name: 'Profile' }],
-                index: 0,
-              },
-            },
-          ],
-        })
-      );
+      navigation.navigate('Profile' as any);
     }
-  }, [status.didJustFinish, status.duration, addXP, logSession, incrementStreak, navigation]);
+  }, [status.currentTime, status.duration, addXP, logSession, incrementStreak, navigation]);
 
   // ── Controls ────────────────────────────────────────────────────────
   const togglePlayPause = () => {
@@ -132,7 +131,7 @@ export default function AudioPlayerScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.closeButton} onPress={handleClose} activeOpacity={0.7}>
-          <FontAwesome5 name="chevron-down" size={24} color="#8A93A6" />
+          <FontAwesome5 name="chevron-down" size={24} color="#AFAFAF" />
         </TouchableOpacity>
         <Text style={styles.headerLabel}>NOW PLAYING</Text>
         <View style={{ width: 40 }} />
@@ -207,7 +206,7 @@ export default function AudioPlayerScreen() {
             onPress={skipBackward}
             activeOpacity={0.8}
           >
-            <FontAwesome5 name="backward" size={24} color="#8A93A6" solid />
+            <FontAwesome5 name="backward" size={24} color="#AFAFAF" solid />
             <Text style={styles.skipLabel}>15</Text>
           </TouchableOpacity>
 
@@ -239,7 +238,7 @@ export default function AudioPlayerScreen() {
             onPress={skipForward}
             activeOpacity={0.8}
           >
-            <FontAwesome5 name="forward" size={24} color="#8A93A6" solid />
+            <FontAwesome5 name="forward" size={24} color="#AFAFAF" solid />
             <Text style={styles.skipLabel}>15</Text>
           </TouchableOpacity>
 
@@ -248,7 +247,7 @@ export default function AudioPlayerScreen() {
             onPress={() => {/* loop toggle placeholder */}}
             activeOpacity={0.8}
           >
-            <FontAwesome5 name="redo" size={20} color="#8A93A6" solid />
+            <FontAwesome5 name="redo" size={20} color="#AFAFAF" solid />
           </TouchableOpacity>
         </View>
       </View>
@@ -259,7 +258,7 @@ export default function AudioPlayerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1A1F2B',
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
@@ -275,7 +274,7 @@ const styles = StyleSheet.create({
   headerLabel: {
     fontSize: 13,
     fontWeight: '900',
-    color: '#8A93A6',
+    color: '#AFAFAF',
     letterSpacing: 2,
   },
   content: {
@@ -291,7 +290,7 @@ const styles = StyleSheet.create({
     width: 240,
     height: 245,
     borderRadius: 120,
-    backgroundColor: '#10141C',
+    backgroundColor: '#CCCCCC',
     alignItems: 'center',
     marginBottom: 40,
   },
@@ -309,14 +308,14 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 26,
     fontWeight: '900',
-    color: '#FFFFFF',
+    color: '#4B4B4B',
     textAlign: 'center',
     marginBottom: 6,
   },
   subtitleText: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#8A93A6',
+    color: '#AFAFAF',
     textAlign: 'center',
     marginBottom: 36,
   },
@@ -333,7 +332,7 @@ const styles = StyleSheet.create({
   progressTrackBg: {
     width: '100%',
     height: 6,
-    backgroundColor: '#2A3040',
+    backgroundColor: '#E5E5E5',
     borderRadius: 3,
     position: 'relative',
     justifyContent: 'center',
@@ -352,7 +351,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#58CC02',
     marginLeft: -8,
     borderWidth: 2,
-    borderColor: '#1A1F2B',
+    borderColor: '#FFFFFF',
   },
   timeRow: {
     flexDirection: 'row',
@@ -362,7 +361,7 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#8A93A6',
+    color: '#AFAFAF',
   },
 
   // ── Controls ───────────────────────────────────────────────────────
@@ -381,7 +380,7 @@ const styles = StyleSheet.create({
   skipLabel: {
     fontSize: 10,
     fontWeight: '900',
-    color: '#8A93A6',
+    color: '#AFAFAF',
     marginTop: 2,
   },
   playControl: {
