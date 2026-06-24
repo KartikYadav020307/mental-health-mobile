@@ -75,7 +75,7 @@ export default function AudioPlayerScreen() {
       incrementStreak();
 
       // Navigate to Profile tab so the user sees their rewards
-      navigation.navigate('Profile' as any);
+      (navigation as any).navigate('Profile');
     }
   }, [status.currentTime, status.duration, addXP, logSession, incrementStreak, navigation]);
 
