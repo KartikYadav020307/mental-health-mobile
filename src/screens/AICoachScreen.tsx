@@ -5,12 +5,11 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase';
+import { useUserStore } from '../store/useUserStore';
+
+const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY';
 
 const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ 
-  model: 'gemini-1.5-flash',
-  systemInstruction: 'You are Serenova, an empathetic, CBT-trained mental health AI coach. Keep your responses extremely concise (1-3 sentences maximum) so they fit nicely in mobile chat bubbles. Be warm, validating, and offer gentle, actionable advice. Do not use markdown bolding or bullet points.'
-});
 const emModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
 type Message = {
@@ -22,6 +21,11 @@ type Message = {
 export default function AICoachScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+  
+  const currentStreak = useUserStore((s) => s.currentStreak);
+  const totalXP = useUserStore((s) => s.totalXP);
+  const minutesMeditated = useUserStore((s) => s.minutesMeditated);
+
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -101,8 +105,31 @@ export default function AICoachScreen() {
         ? `User context from past journal entries:\n${mappedContext}\n\nUser message: ${userText}`
         : userText;
 
-      const result = await model.generateContent(promptPayload);
-      const aiText = result.response.text();
+      const systemPrompt = `You are Serenova, a warm, empathetic mental health coach. Do not be overly enthusiastic or gamified. The user currently has a streak of ${currentStreak} days and has meditated for ${minutesMeditated} minutes. Keep your responses to 1-2 short sentences.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: promptPayload }
+          ],
+          max_tokens: 150,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiText = data.choices[0].message.content.trim();
       
       const aiResponse: Message = { 
         id: (Date.now() + 1).toString(), 
@@ -129,8 +156,11 @@ export default function AICoachScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+    >
+      <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.7}>
             <FontAwesome5 name="times" size={24} color="#AFAFAF" />
@@ -142,7 +172,7 @@ export default function AICoachScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.chatContent}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.chatContent}>
           {messages.map((msg) => (
             <View key={msg.id} style={[styles.bubbleWrapper, msg.isUser ? styles.bubbleWrapperUser : styles.bubbleWrapperAI]}>
               <View style={[styles.bubble, msg.isUser ? styles.bubbleUser : styles.bubbleAI]}>
@@ -152,6 +182,13 @@ export default function AICoachScreen() {
               </View>
             </View>
           ))}
+          {isLoading && (
+            <View style={[styles.bubbleWrapper, styles.bubbleWrapperAI]}>
+              <View style={[styles.bubble, styles.bubbleAI, { paddingHorizontal: 20 }]}>
+                <Text style={[styles.bubbleText, styles.bubbleTextAI]}>...</Text>
+              </View>
+            </View>
+          )}
         </ScrollView>
 
         <View style={styles.inputContainer}>
@@ -173,8 +210,8 @@ export default function AICoachScreen() {
             <FontAwesome5 name="paper-plane" size={20} color="#FFFFFF" solid />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

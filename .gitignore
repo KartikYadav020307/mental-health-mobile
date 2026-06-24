@@ -105,3 +105,7 @@ Thumbs.db
 
 # Misc
 *.orig.*
+
+# Webpage downloads
+*_files/
+*.download
