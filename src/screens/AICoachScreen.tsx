@@ -7,10 +7,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase';
 import { useUserStore } from '../store/useUserStore';
 
-// ── Paste your Google AI Studio API key here ────────────────────────────────
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+// ── API key loaded from .env.local (EXPO_PUBLIC_ prefix makes it available client-side)
+const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
+if (!GEMINI_API_KEY) {
+  console.error('Missing EXPO_PUBLIC_GEMINI_API_KEY in .env.local');
+}
 
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY ?? '');
 // Embedding model for vector recall from journal entries
 const emModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
