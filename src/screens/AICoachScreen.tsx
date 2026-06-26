@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,9 +7,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../lib/supabase';
 import { useUserStore } from '../store/useUserStore';
 
-const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY';
+// ── Paste your Google AI Studio API key here ────────────────────────────────
+const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
 
-const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Embedding model for vector recall from journal entries
 const emModel = genAI.getGenerativeModel({ model: 'text-embedding-004' });
 
 type Message = {
@@ -105,31 +107,25 @@ export default function AICoachScreen() {
         ? `User context from past journal entries:\n${mappedContext}\n\nUser message: ${userText}`
         : userText;
 
-      const systemPrompt = `You are Serenova, a warm, empathetic mental health coach. Do not be overly enthusiastic or gamified. The user currently has a streak of ${currentStreak} days and has meditated for ${minutesMeditated} minutes. Keep your responses to 1-2 short sentences.`;
+      // ── Gemini SDK: dynamic system prompt with live user stats ───────
+      const systemInstruction = `You are Serenova, a warm, empathetic mental health coach. Do not be overly enthusiastic or gamified. The user currently has a streak of ${currentStreak} days and has meditated for ${minutesMeditated} minutes. Keep your responses to 1-2 short sentences.`;
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: promptPayload }
-          ],
-          max_tokens: 150,
-          temperature: 0.7
-        })
+      const chatModel = genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+        systemInstruction,
       });
 
-      if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
-      }
+      // Build prior history in Gemini SDK format (exclude initial greeting)
+      const priorHistory = messages
+        .filter((m) => m.id !== '1') // skip the static greeting
+        .map((m) => ({
+          role: m.isUser ? ('user' as const) : ('model' as const),
+          parts: [{ text: m.text }],
+        }));
 
-      const data = await response.json();
-      const aiText = data.choices[0].message.content.trim();
+      const chat = chatModel.startChat({ history: priorHistory });
+      const result = await chat.sendMessage(promptPayload);
+      const aiText = result.response.text();
       
       const aiResponse: Message = { 
         id: (Date.now() + 1).toString(), 
