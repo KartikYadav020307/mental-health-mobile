@@ -54,7 +54,7 @@ export default function SleepScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: '#1A1F2B' 
+    backgroundColor: '#FFFFFF' 
   },
   content: { 
     padding: 24, 
@@ -68,13 +68,13 @@ const styles = StyleSheet.create({
   headerGreeting: { 
     fontSize: 32, 
     fontWeight: '900', 
-    color: '#FFFFFF',
+    color: '#4B4B4B',
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 18,
     fontWeight: '800',
-    color: '#8A93A6',
+    color: '#AFAFAF',
   },
   listContainer: {
     gap: 16,
@@ -82,26 +82,26 @@ const styles = StyleSheet.create({
   trackCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#2A3040',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
     borderWidth: 2,
-    borderColor: '#3A4050',
+    borderColor: '#E5E5E5',
     borderBottomWidth: 6,
-    borderBottomColor: '#10141C'
+    borderBottomColor: '#CCCCCC'
   },
   iconContainer: { 
     width: 60, 
     height: 60, 
     borderRadius: 20, 
-    backgroundColor: '#1A1F2B', 
+    backgroundColor: '#F7F7F7', 
     alignItems: 'center', 
     justifyContent: 'center', 
     marginRight: 16,
     borderWidth: 2,
-    borderColor: '#3A4050',
+    borderColor: '#E5E5E5',
     borderBottomWidth: 4,
-    borderBottomColor: '#10141C'
+    borderBottomColor: '#CCCCCC'
   },
   trackInfo: { 
     flex: 1 
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   trackTitle: { 
     fontSize: 20, 
     fontWeight: '900', 
-    color: '#FFFFFF', 
+    color: '#4B4B4B', 
     marginBottom: 6 
   },
   trackSubtitle: { 
