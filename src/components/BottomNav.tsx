@@ -53,7 +53,7 @@ export default function BottomNav({ state, descriptors, navigation }: BottomTabB
               <FontAwesome5 
                 name={iconName} 
                 size={28} 
-                color={isFocused ? '#1CB0F6' : '#AFAFAF'} 
+                color={isFocused ? '#58CC02' : '#999999'} 
                 solid={isFocused}
               />
             </TouchableOpacity>

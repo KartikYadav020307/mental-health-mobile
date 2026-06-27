@@ -18,6 +18,9 @@ export default function BottomTabNavigator() {
       tabBar={(props) => <BottomNav {...props} />}
       screenOptions={{
         headerShown: false,
+        tabBarStyle: { backgroundColor: '#FFFFFF', borderTopColor: '#E5E5E5' },
+        tabBarActiveTintColor: '#58CC02',
+        tabBarInactiveTintColor: '#999999',
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
