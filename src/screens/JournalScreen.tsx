@@ -154,7 +154,7 @@ export default function JournalScreen() {
               <TextInput
                 style={styles.inputTitle}
                 placeholder="Title (e.g., Morning Thoughts)"
-                placeholderTextColor="#AFAFAF"
+                placeholderTextColor="#999999"
                 value={newTitle}
                 onChangeText={setNewTitle}
                 editable={!isSubmitting}
@@ -162,7 +162,7 @@ export default function JournalScreen() {
               <TextInput
                 style={styles.inputContent}
                 placeholder="Write whatever is on your mind..."
-                placeholderTextColor="#AFAFAF"
+                placeholderTextColor="#999999"
                 value={newContent}
                 onChangeText={setNewContent}
                 multiline
@@ -199,21 +199,21 @@ const styles = StyleSheet.create({
   headerTitleContainer: { flexDirection: 'row', alignItems: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '900', color: '#4B4B4B' },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  listContainer: { padding: 24, gap: 16, paddingBottom: 120 },
+  listContainer: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 120 },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 60 },
   emptyText: { fontSize: 16, fontWeight: '800', color: '#AFAFAF', textAlign: 'center', marginTop: 16, paddingHorizontal: 20 },
-  entryCard: { backgroundColor: '#FFFFFF', borderRadius: 16, borderWidth: 2, borderColor: '#E5E5E5', borderBottomWidth: 5, borderBottomColor: '#E5E5E5', padding: 20 },
-  entryTitle: { fontSize: 18, fontWeight: '900', color: '#4B4B4B', marginBottom: 4 },
-  entryDate: { fontSize: 14, fontWeight: '800', color: '#1CB0F6', marginBottom: 12 },
-  entryContent: { fontSize: 16, fontWeight: '600', color: '#8A93A6', lineHeight: 22 },
+  entryCard: { backgroundColor: '#FFFFFF', borderRadius: 16, borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#E5E5E5', borderLeftColor: '#E5E5E5', borderRightColor: '#E5E5E5', borderBottomColor: '#CCCCCC', padding: 16, marginBottom: 12 },
+  entryTitle: { fontSize: 18, fontWeight: '900', color: '#333333', marginBottom: 4 },
+  entryDate: { fontSize: 14, fontWeight: '800', color: '#999999', marginBottom: 12 },
+  entryContent: { fontSize: 16, fontWeight: '600', color: '#4B4B4B', lineHeight: 22 },
   fab: { position: 'absolute', bottom: 30, right: 24, flexDirection: 'row', backgroundColor: '#58CC02', paddingHorizontal: 24, paddingVertical: 16, borderRadius: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#78DC28', borderBottomWidth: 6, borderBottomColor: '#58A700', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 },
   fabText: { fontSize: 16, fontWeight: '900', color: '#FFFFFF' },
   modalSafeArea: { flex: 1, backgroundColor: '#FFFFFF' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 24, borderBottomWidth: 2, borderBottomColor: '#E5E5E5' },
   modalHeaderTitle: { fontSize: 24, fontWeight: '900', color: '#4B4B4B' },
-  modalContent: { padding: 24, gap: 16 },
-  inputTitle: { backgroundColor: '#F7F7F7', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 16, padding: 16, fontSize: 18, fontWeight: '800', color: '#4B4B4B' },
-  inputContent: { backgroundColor: '#F7F7F7', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 16, padding: 16, fontSize: 16, fontWeight: '600', color: '#4B4B4B', height: 300 },
-  saveButton: { backgroundColor: '#1CB0F6', paddingVertical: 18, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#1CB0F6', borderBottomWidth: 5, borderBottomColor: '#1899D6', marginTop: 16 },
-  saveButtonText: { fontSize: 18, fontWeight: '900', color: '#FFFFFF' }
+  modalContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40, gap: 16 },
+  inputTitle: { backgroundColor: '#F9F9F9', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 16, padding: 16, fontSize: 18, fontWeight: '800', color: '#4B4B4B' },
+  inputContent: { backgroundColor: '#F9F9F9', borderWidth: 2, borderColor: '#E5E5E5', borderRadius: 16, padding: 16, fontSize: 16, fontWeight: '600', color: '#4B4B4B', minHeight: 120 },
+  saveButton: { backgroundColor: '#E5F6D3', paddingVertical: 18, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderTopWidth: 2, borderLeftWidth: 2, borderRightWidth: 2, borderBottomWidth: 6, borderTopColor: '#58CC02', borderLeftColor: '#58CC02', borderRightColor: '#58CC02', borderBottomColor: '#4BA100', marginTop: 16 },
+  saveButtonText: { fontSize: 18, fontWeight: '900', color: '#333333' }
 });

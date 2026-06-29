@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
+import { supabase } from '../lib/supabase';
 
 const { width } = Dimensions.get('window');
 
@@ -82,20 +83,42 @@ export default function OnboardingScreen() {
     }
   };
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step < TOTAL_STEPS - 1) {
       setStep(s => s + 1);
     } else {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error } = await supabase.from('profiles').insert({
+            user_id: user.id,
+            display_name: user.user_metadata?.full_name || 'Guest User',
+            experience_level: experience,
+            goals: selectedGoals,
+            persona: persona.name,
+            reminder_time: reminder || 'morning',
+          });
+          if (error) {
+            console.error('Error inserting onboarding profile:', error);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to insert onboarding profile:', err);
+      }
       completeOnboarding();
-      navigation.replace('MainTabs');
     }
   };
 
-  const goPrev = () => {
+  const goPrev = async () => {
     if (step > 0) {
       setStep(s => s - 1);
     } else {
-      navigation.replace('Auth');
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error('Error signing out during onboarding back:', err);
+      }
+      useUserStore.getState().clearSession();
     }
   };
 

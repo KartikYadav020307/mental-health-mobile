@@ -6,7 +6,6 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 
 const XP_PER_LEVEL = 100;
@@ -27,7 +26,7 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      await AsyncStorage.clear();
+      useUserStore.getState().resetStore();
       navigation.reset({ index: 0, routes: [{ name: 'Auth' }] });
     } catch (error) {
       console.error('Logout error:', error);

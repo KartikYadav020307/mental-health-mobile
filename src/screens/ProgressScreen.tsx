@@ -2,9 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, Platform, StatusBar } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 
 export default function ProgressScreen() {
+  const insets = useSafeAreaInsets();
   const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   const [activeDays, setActiveDays] = useState([false, false, false, false, false, false, false]);
   const [totalXP, setTotalXP] = useState(0);
@@ -109,7 +111,7 @@ export default function ProgressScreen() {
   ];
 
   return (
-    <SafeAreaView style={[styles.safeArea, { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }]}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 120 }]}>
         
         {/* Header */}
