@@ -13,9 +13,13 @@ import { RootStackParamList } from '../navigation/types';
 import { useUserStore } from '../store/useUserStore';
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from 'expo-audio';
 
-// Royalty-free placeholder audio (a relaxing piano loop hosted on archive.org)
-const PLACEHOLDER_AUDIO_URL =
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+// Dynamic audio map routing track titles to actual hosted MP3s
+const AUDIO_MAP: Record<string, string> = {
+  'Mindfulness Basics': 'https://mqoqckyislcwertzihxl.supabase.co/storage/v1/object/public/meditation-audio/The_Beginning.mp3',
+  'The Beginning': 'https://mqoqckyislcwertzihxl.supabase.co/storage/v1/object/public/meditation-audio/The_Beginning.mp3',
+};
+
+const DEFAULT_AUDIO = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 
 /** Format seconds to mm:ss */
 function formatTime(s: number): string {
@@ -32,7 +36,8 @@ export default function AudioPlayerScreen() {
   const insets = useSafeAreaInsets();
   const { title } = route.params;
 
-  const player = useAudioPlayer(PLACEHOLDER_AUDIO_URL);
+  const audioUrl = AUDIO_MAP[title] || DEFAULT_AUDIO;
+  const player = useAudioPlayer(audioUrl);
   const status = useAudioPlayerStatus(player);
 
   const addXP = useUserStore((s) => s.addXP);
